@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   const ip = (req.headers.get("x-forwarded-for") ?? "local").split(",")[0].trim();
   if (!allowArtifact(ip)) return Response.json({ error: "Limit: 15 drafts per hour." }, { status: 429 });
 
-  const v = getVersion(b.versionId);
+  const v = await getVersion(b.versionId);
   if (!v) return Response.json({ error: "guide not found" }, { status: 404 });
   const g = v.guide;
   const facts = g.provenance.claims

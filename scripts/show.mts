@@ -1,4 +1,4 @@
-import { getLatest } from "../src/lib/store";
+import { getLatestLocal as getLatest } from "../src/lib/store";
 
 const slug = process.argv[2] ?? "notion";
 const v = getLatest(slug);

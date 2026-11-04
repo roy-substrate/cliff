@@ -67,7 +67,7 @@ export async function generateGuide(input: string, emit: Emit, opts: RunOpts = {
 
   const resolved = await timed("resolve", () => within(DEADLINE.resolve, opts.signal, (s) => S.resolve(input, meter, s)));
   const slug = resolved?.slug ?? guess;
-  const cached = !opts.force && getLatest(slug);
+  const cached = !opts.force && (await getLatest(slug));
   if (cached && Date.now() - new Date(cached.created_at).getTime() < 30 * 864e5) {
     emit({ type: "cached", guideId: cached.versionId });
     return { versionId: cached.versionId, slug, guide: cached.guide, cost: 0 };
@@ -221,7 +221,7 @@ export async function generateGuide(input: string, emit: Emit, opts: RunOpts = {
   };
 
   const versionId = newVersionId(slug);
-  saveVersion({ versionId, slug, created_at: new Date().toISOString(), created_by: opts.createdBy ?? "live", cost_usd: meter.usd, guide });
+  await saveVersion({ versionId, slug, created_at: new Date().toISOString(), created_by: opts.createdBy ?? "live", cost_usd: meter.usd, guide });
   emit({ type: "stage", stage: "publish", status: "done", ms: Date.now() - t0 });
   emit({ type: "done", guideId: slug, versionId, cost_usd: meter.usd });
   return { versionId, slug, guide, cost: meter.usd };

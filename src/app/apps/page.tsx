@@ -4,7 +4,7 @@ import { listLatest } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-export default function Apps() {
+export default async function Apps() {
   return (
     <div>
       <h1 className="text-2xl font-semibold tracking-tight">Library</h1>
@@ -12,7 +12,7 @@ export default function Apps() {
       <div className="mb-6 max-w-2xl">
         <SearchBox />
       </div>
-      <LibraryGrid items={listLatest()} />
+      <LibraryGrid items={await listLatest()} />
     </div>
   );
 }

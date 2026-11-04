@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { getLatest } from "../src/lib/store";
+import { getLatestLocal as getLatest } from "../src/lib/store";
 
 /** Summarises every guide in data/guides. Quote support is NOT the same as factual accuracy: it only says a quote exists on the cited page. */
 const root = path.join(process.cwd(), "data", "guides");

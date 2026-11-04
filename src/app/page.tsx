@@ -4,8 +4,8 @@ import { listLatest } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-export default function Home() {
-  const items = listLatest();
+export default async function Home() {
+  const items = await listLatest();
   return (
     <div>
       <section className="py-8">

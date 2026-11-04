@@ -27,7 +27,7 @@ export default async function Generate({ searchParams }: PageProps<"/generate">)
   // A library app opens its existing guide: instant, free, and already spot-checked.
   if (!force) {
     const s = slugify(q);
-    const hit = getLatest(ALIASES[s] ?? s);
+    const hit = await getLatest(ALIASES[s] ?? s);
     if (hit && hit.guide.status !== "fallback") redirect(`/apps/${hit.slug}`);
   }
   return <Theater q={q.slice(0, 100)} force={force} />;

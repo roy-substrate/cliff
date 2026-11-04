@@ -8,7 +8,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { getLatest, newVersionId, saveVersion } from "../src/lib/store";
+import { getLatestLocal, newVersionId, saveVersion } from "../src/lib/store";
 import { AttemptEntry } from "../src/lib/schema";
 
 function arg(name: string): string | undefined {
@@ -24,7 +24,7 @@ if (!slug || !action || !observed || !outcome.success) {
   process.exit(1);
 }
 
-const cur = getLatest(slug);
+const cur = getLatestLocal(slug);
 if (!cur) {
   console.error(`no guide for "${slug}"`);
   process.exit(1);
@@ -75,5 +75,5 @@ if (step) {
 }
 
 const versionId = newVersionId(slug);
-saveVersion({ versionId, slug, created_at: now, created_by: "library", cost_usd: cur.cost_usd, guide });
+await saveVersion({ versionId, slug, created_at: now, created_by: "library", cost_usd: cur.cost_usd, guide });
 console.log(`attached ${attemptId} to ${slug}: new version ${versionId}${shotUrl ? `, screenshot ${shotUrl}` : ""}`);
