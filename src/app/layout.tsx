@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Script from "next/script";
 import { Baloo_2, Caveat, Geist, Geist_Mono } from "next/font/google";
 import { Pip } from "@/components/brand/Mascot";
 import "./globals.css";
@@ -19,6 +20,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${baloo.variable} ${caveat.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
+        {/* Microsoft Clarity: lets the author see whether and how reviewers used the site */}
+        <Script id="ms-clarity" strategy="afterInteractive">{`
+          (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+          })(window, document, "clarity", "script", "z8efc1cjeq");
+        `}</Script>
         <header className="sticky top-0 z-40 px-4 pt-4">
           <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-full bg-white/90 px-4 py-2 shadow-soft backdrop-blur-sm">
             <Link href="/" className="group flex items-center gap-2">
