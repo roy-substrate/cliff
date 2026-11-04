@@ -1,0 +1,1861 @@
+{
+  "versionId": "microsoft-entra-id-202611041204-fwcc",
+  "slug": "microsoft-entra-id",
+  "created_at": "2026-11-04T12:04:33.305Z",
+  "created_by": "library",
+  "cost_usd": 0.5783684200000001,
+  "guide": {
+    "app": {
+      "name": "Microsoft Entra ID",
+      "slug": "microsoft-entra-id",
+      "homepage": "https://www.microsoft.com/security/business/identity-access/microsoft-entra-id",
+      "developer_portal": "https://entra.microsoft.com"
+    },
+    "summary": "Entra ID uses standard OAuth 2.0 authorization code flow with PKCE on login.microsoftonline.com. Microsoft does not run an app review step that the claims describe. The real gate is consent inside each customer's tenant: users can self-consent only to low-privilege permissions, and tenants may restrict even that to verified-publisher apps. Directory and application permissions always need a tenant admin. Composio has no managed auth for this toolkit, so you must register your own app. Registration itself is quick. Getting customer admins to consent is the slow, unpredictable part.",
+    "has_oauth": true,
+    "auth_alternatives": [
+      "App-only access with application permissions (app roles, client credentials style): choose it when the agent must act without a signed-in user, for example for background directory jobs. The trade-off is that only an admin can consent, and the app acts with its own identity rather than the user's.",
+      "Single-tenant registration: choose it when the agent only serves your own organization. Microsoft recommends this for most apps, but it cannot serve other organizations' users, and the registration cannot later be moved to another tenant."
+    ],
+    "build_or_borrow": {
+      "composio_managed": false,
+      "composio_slug": "microsoft-entra-id",
+      "reasons_to_bring_own": [
+        "Composio does not offer managed auth for this toolkit, so an app registration of your own is required.",
+        "Customer tenants may only allow user consent for verified-publisher apps, so the app needs to be under a publisher identity you control.",
+        "Admin-restricted permissions such as Directory.ReadWrite.All need tenant admin consent for your specific app."
+      ],
+      "agent_access_allowed": "unknown",
+      "verdict": "Register your own multitenant Entra app, because Composio has no managed auth for this toolkit. Expect each customer's tenant admin to grant consent for any directory-level permissions."
+    },
+    "time": {
+      "hands_on_minutes": 80,
+      "approval_required": true,
+      "approval_wait_days_min": null,
+      "approval_wait_days_max": null,
+      "unapproved_usable": true,
+      "claim_ids": [
+        "c1",
+        "c9",
+        "c12",
+        "c13",
+        "c18",
+        "c24",
+        "c34",
+        "c36"
+      ]
+    },
+    "prerequisites": [
+      {
+        "text": "An Entra tenant where you hold at least the Application Developer role, so you can create the app registration.",
+        "claim_ids": [
+          "c12",
+          "c37"
+        ]
+      },
+      {
+        "text": "If you want to test or change tenant consent settings, you need the Privileged Role Administrator role. Global Administrator is needed only if you do this in the admin center.",
+        "claim_ids": [
+          "c11",
+          "c23"
+        ]
+      },
+      {
+        "text": "Before registering, decide whether the app is single tenant or multitenant. An agent serving other organizations needs multitenant.",
+        "claim_ids": [
+          "c15",
+          "c16",
+          "c38"
+        ]
+      }
+    ],
+    "oauth": {
+      "flow": "authorization_code_pkce",
+      "authorize_url": "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize",
+      "token_url": "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token",
+      "pkce": "supported",
+      "refresh_tokens": "yes",
+      "token_lifetime": "Access token expires_in is 3599 seconds (about 1 hour) in Microsoft's example. Authorization codes expire after about 1 minute. Refresh tokens are long-lived and are returned only if offline_access is requested.",
+      "redirect_uri_rules": [
+        "The redirect_uri must exactly match one registered on the app.",
+        "For native apps, the recommended values are the nativeclient URL or http://localhost.",
+        "The {tenant} path segment can be common, organizations, consumers, or a tenant identifier."
+      ],
+      "claim_ids": [
+        "c25",
+        "c26",
+        "c27",
+        "c28",
+        "c29",
+        "c30",
+        "c31",
+        "c32",
+        "c42"
+      ]
+    },
+    "blockers": [
+      {
+        "text": "Directory-level permissions such as Directory.ReadWrite.All, many other high-privilege delegated permissions, and all application permissions require tenant admin consent. A normal user cannot connect the agent for these.",
+        "workaround": "Ask for the smallest set of delegated permissions. Point customers to the admin consent workflow so users can request approval, or have their admin grant consent up front.",
+        "severity": "high",
+        "claim_ids": [
+          "c8",
+          "c9",
+          "c34",
+          "c36",
+          "c7",
+          "c24"
+        ]
+      },
+      {
+        "text": "Tenants using the microsoft-user-default-low policy only allow user consent for verified-publisher apps and low-impact permissions. Microsoft recommends this setting, so many tenants may block self-service consent for an unverified app.",
+        "workaround": "Plan to become a verified publisher. The claims do not document that process, so check it separately. Until then, rely on admin consent.",
+        "severity": "med",
+        "claim_ids": [
+          "c2",
+          "c3",
+          "c22"
+        ]
+      },
+      {
+        "text": "If a customer tenant sets your app to require user assignment, an admin must consent even when user consent would otherwise be allowed.",
+        "workaround": "Tell customer admins to grant tenant-wide consent when they enable assignment.",
+        "severity": "med",
+        "claim_ids": [
+          "c5"
+        ]
+      }
+    ],
+    "app_specific_gotchas": [
+      {
+        "text": "Authorization codes expire after about 1 minute, so the token exchange must happen right after the redirect.",
+        "claim_ids": [
+          "c31"
+        ]
+      },
+      {
+        "text": "You get no refresh token unless you request offline_access. Without it, the agent loses access after about an hour.",
+        "claim_ids": [
+          "c32"
+        ]
+      },
+      {
+        "text": "An app registration cannot be moved between tenants after creation. Create it in the tenant that will own it long term.",
+        "claim_ids": [
+          "c17"
+        ]
+      },
+      {
+        "text": "Tightening a tenant's consent settings does not revoke existing grants. Only future consent operations are affected.",
+        "claim_ids": [
+          "c6"
+        ]
+      },
+      {
+        "text": "New registrations are hidden from users on My Apps until an admin sets Visible to users? to Yes under Enterprise apps > Properties.",
+        "claim_ids": [
+          "c19"
+        ]
+      }
+    ],
+    "agent_vs_human": {
+      "agent_can": [
+        "Write the authorization code + PKCE integration, preferably with Microsoft's authentication libraries, including offline_access and the token exchange.",
+        "List the redirect URIs to register.",
+        "Draft scope justifications and admin-consent request text for customer admins.",
+        "Lay out the single-tenant versus multitenant trade-off for the developer to decide."
+      ],
+      "human_must": [
+        "Sign in to the Entra admin center with at least the Application Developer role and create the registration.",
+        "Choose Supported account types and the home tenant. The registration cannot be moved between tenants later.",
+        "Create client credentials. Microsoft recommends certificates over secrets for confidential clients.",
+        "Pursue verified publisher status if self-service user consent in restrictive tenants matters.",
+        "Coordinate with customer tenant admins to grant admin consent."
+      ]
+    },
+    "artifacts": [
+      {
+        "kind": "redirect_uri_list",
+        "label": "Exact redirect URIs to register on the app"
+      },
+      {
+        "kind": "scope_justification",
+        "label": "Per-permission justification for customer admins reviewing consent"
+      },
+      {
+        "kind": "consent_screen_copy",
+        "label": "App name and description shown to users at consent"
+      }
+    ],
+    "cliff": {
+      "scope_tiers": [
+        {
+          "scope": "User.Read",
+          "purpose": "Sign the user in and read their basic profile. It is the default permission on a new registration.",
+          "action_label": "Read your profile",
+          "tier": "basic",
+          "gate": "Users can consent themselves by default for permissions that do not need admin consent. In external tenants an admin must grant consent for User.Read on behalf of all users. In tenants using microsoft-user-default-low, user consent is limited to verified-publisher apps, apps registered in that tenant, and low-impact permissions.",
+          "cheaper_alternative": null,
+          "claim_ids": [
+            "c20",
+            "c1",
+            "c21",
+            "c3"
+          ]
+        },
+        {
+          "scope": "offline_access",
+          "purpose": "Get a refresh token so the agent can keep acting after the roughly 1 hour access token expires.",
+          "action_label": "Stay connected when you are not signed in",
+          "tier": "unknown",
+          "gate": "Refresh tokens are returned only if offline_access is requested. The provided claims do not state whether this permission needs admin consent or counts as low impact.",
+          "cheaper_alternative": null,
+          "claim_ids": [
+            "c32"
+          ]
+        },
+        {
+          "scope": "Directory.ReadWrite.All (and other high-privilege delegated permissions)",
+          "purpose": "Read and change directory objects on the signed-in user's behalf.",
+          "action_label": "Read and change your organization's directory",
+          "tier": "admin_only",
+          "gate": "Admin-restricted. A tenant admin must consent. Users cannot grant it themselves, so each customer tenant needs an admin to approve.",
+          "cheaper_alternative": "Request only delegated permissions that do not require admin consent. Users can consent to those by default, subject to the tenant's consent policy.",
+          "claim_ids": [
+            "c34",
+            "c9",
+            "c36",
+            "c1"
+          ]
+        },
+        {
+          "scope": "Application permissions (app roles, app-only access)",
+          "purpose": "Let the agent act as itself with no signed-in user, for example in background jobs.",
+          "action_label": "Access organization data without a signed-in user",
+          "tier": "admin_only",
+          "gate": "All application permissions require admin consent. Generally only an admin or the owner of the API's service principal can consent.",
+          "cheaper_alternative": "Use delegated access with permissions that do not require admin consent, if the agent can act while a user is signed in.",
+          "claim_ids": [
+            "c8",
+            "c9",
+            "c35",
+            "c36",
+            "c1"
+          ]
+        },
+        {
+          "scope": "Custom application scopes (your own API)",
+          "purpose": "Call your own backend API that is protected by Entra.",
+          "action_label": "Access the agent's own service",
+          "tier": "basic",
+          "gate": "Not treated as high-privilege and does not require admin consent. Tenant consent policy can still restrict user consent.",
+          "cheaper_alternative": null,
+          "claim_ids": [
+            "c10",
+            "c3"
+          ]
+        }
+      ],
+      "paths": [
+        {
+          "distribution": "internal",
+          "verdict": "Easy if you control the tenant. Register a single-tenant app in your own tenant. Microsoft recommends single tenant for most apps. The provided claims document no provider review. The only gates are your own tenant's roles and admin consent for admin-only permissions or user assignment.",
+          "total_days_min": 0,
+          "total_days_max": 0,
+          "nodes": [
+            {
+              "id": "i1",
+              "title": "Confirm you hold at least the Application Developer role in the tenant",
+              "actor": "developer",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c12",
+                "c37"
+              ]
+            },
+            {
+              "id": "i2",
+              "title": "Decide the tenant and supported account types (single tenant for internal use). The registration cannot be moved between tenants later.",
+              "actor": "developer",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i1"
+              ],
+              "claim_ids": [
+                "c15",
+                "c38",
+                "c17"
+              ]
+            },
+            {
+              "id": "i3",
+              "title": "Create the app under App registrations > New registration in the Entra admin center, then copy the Application (client) ID from Overview",
+              "actor": "developer",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i2"
+              ],
+              "claim_ids": [
+                "c13",
+                "c14",
+                "c18",
+                "c39"
+              ]
+            },
+            {
+              "id": "i4",
+              "title": "List exact redirect URIs and pick the minimal permission set (delegated, non-admin where possible, plus offline_access if refresh is needed)",
+              "actor": "agent",
+              "est_minutes": 20,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c30",
+                "c32",
+                "c9"
+              ]
+            },
+            {
+              "id": "i5",
+              "title": "Write the auth code + PKCE integration against the tenant-scoped v2.0 authorize and token endpoints, preferably using Microsoft's auth libraries",
+              "actor": "agent",
+              "est_minutes": 120,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i4"
+              ],
+              "claim_ids": [
+                "c25",
+                "c26",
+                "c27",
+                "c28",
+                "c29",
+                "c31"
+              ]
+            },
+            {
+              "id": "i6",
+              "title": "Register redirect URIs, add API permissions, and add a certificate credential for confidential clients (Microsoft prefers certificates over secrets; public clients use neither)",
+              "actor": "developer",
+              "est_minutes": 20,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i3",
+                "i4"
+              ],
+              "claim_ids": [
+                "c30",
+                "c33"
+              ]
+            },
+            {
+              "id": "i7",
+              "title": "Have a tenant admin grant admin consent if you use admin-only permissions or require user assignment",
+              "actor": "developer",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i6"
+              ],
+              "claim_ids": [
+                "c5",
+                "c9",
+                "c36"
+              ]
+            },
+            {
+              "id": "i8",
+              "title": "Optional: have an admin set Visible to users? to Yes under Enterprise apps > Properties so the app shows in My Apps",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i3"
+              ],
+              "claim_ids": [
+                "c19"
+              ]
+            },
+            {
+              "id": "i9",
+              "title": "Test sign-in end to end with a tenant user",
+              "actor": "developer",
+              "est_minutes": 30,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i5",
+                "i7"
+              ],
+              "claim_ids": [
+                "c42"
+              ]
+            }
+          ]
+        },
+        {
+          "distribution": "unlisted_public",
+          "verdict": "Medium to hard, and the difficulty sits in your customers' tenants, not with Microsoft. A multitenant registration is meant for SaaS apps used by multiple organizations. Each customer tenant's consent policy decides whether users can self-consent. Microsoft recommends allowing user consent only for verified publishers, and the default-low policy blocks unverified outside apps. Any admin-only permission needs each customer's admin. The provided claims do not document how to become a verified publisher or how long that takes.",
+          "total_days_min": 0,
+          "total_days_max": 0,
+          "nodes": [
+            {
+              "id": "u1",
+              "title": "Confirm you hold at least the Application Developer role in your home tenant",
+              "actor": "developer",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c12"
+              ]
+            },
+            {
+              "id": "u2",
+              "title": "Decide on multitenant account types and the home tenant. The registration cannot be moved between tenants later.",
+              "actor": "developer",
+              "est_minutes": 20,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u1"
+              ],
+              "claim_ids": [
+                "c15",
+                "c16",
+                "c17"
+              ]
+            },
+            {
+              "id": "u3",
+              "title": "Create the app via App registrations > New registration and copy the client ID",
+              "actor": "developer",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u2"
+              ],
+              "claim_ids": [
+                "c13",
+                "c18"
+              ]
+            },
+            {
+              "id": "u4",
+              "title": "Pick permissions that avoid admin consent where possible and list exact redirect URIs",
+              "actor": "agent",
+              "est_minutes": 30,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c1",
+                "c9",
+                "c10",
+                "c30"
+              ]
+            },
+            {
+              "id": "u5",
+              "title": "Write the auth code + PKCE integration using the common or organizations tenant value in the v2.0 endpoints",
+              "actor": "agent",
+              "est_minutes": 150,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u4"
+              ],
+              "claim_ids": [
+                "c25",
+                "c26",
+                "c27",
+                "c28",
+                "c29",
+                "c32"
+              ]
+            },
+            {
+              "id": "u6",
+              "title": "Register redirect URIs, permissions and a certificate credential",
+              "actor": "developer",
+              "est_minutes": 20,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u3",
+                "u4"
+              ],
+              "claim_ids": [
+                "c30",
+                "c33"
+              ]
+            },
+            {
+              "id": "u7",
+              "title": "Pursue verified publisher status so tenants on the default-low policy allow user consent. The process is not documented in the provided claims.",
+              "actor": "developer",
+              "est_minutes": 60,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u3"
+              ],
+              "claim_ids": [
+                "c2",
+                "c3",
+                "c22"
+              ]
+            },
+            {
+              "id": "u8",
+              "title": "Verified publisher review: duration not documented",
+              "actor": "provider_wait",
+              "est_minutes": 0,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": true,
+              "depends_on": [
+                "u7"
+              ],
+              "claim_ids": [
+                "c2",
+                "c3"
+              ]
+            },
+            {
+              "id": "u9",
+              "title": "Draft admin-facing copy explaining requested permissions, for customers who route the app through the admin consent workflow",
+              "actor": "agent",
+              "est_minutes": 30,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u4"
+              ],
+              "claim_ids": [
+                "c7",
+                "c24"
+              ]
+            },
+            {
+              "id": "u10",
+              "title": "Each customer tenant admin reviews and consents (admin-only permissions, user assignment, external tenants, or restrictive consent policy). This clock belongs to the customer and is not documented.",
+              "actor": "provider_wait",
+              "est_minutes": 0,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": true,
+              "depends_on": [
+                "u5",
+                "u6",
+                "u9"
+              ],
+              "claim_ids": [
+                "c5",
+                "c7",
+                "c9",
+                "c20",
+                "c24"
+              ]
+            }
+          ]
+        }
+      ],
+      "unapproved_mode": {
+        "limits": [
+          "With no admin involvement, users can consent only to permissions that do not require admin consent, and only if their tenant's consent policy allows it.",
+          "Under the microsoft-user-default-low policy, user consent is limited to verified-publisher apps, apps registered in that tenant, and low-impact permissions. An unverified multitenant app gets no self-consent there.",
+          "Tenants on the legacy policy let users consent to any app for any non-admin permission.",
+          "Application permissions and admin-restricted delegated permissions such as Directory.ReadWrite.All are never available without admin consent.",
+          "In external tenants, even the default User.Read needs admin consent.",
+          "New registrations are hidden from My Apps until an admin makes them visible.",
+          "Changing tenant consent settings does not revoke existing grants. It only affects future consent."
+        ],
+        "breaks_at": "It breaks the first time the app requests any application permission or admin-restricted delegated permission, is set to require user assignment, is used in an external tenant, or is used by a tenant whose consent policy blocks non-verified publishers. At that point users must go through the admin consent workflow, if the tenant has enabled it, or get a tenant admin to consent.",
+        "claim_ids": [
+          "c1",
+          "c3",
+          "c4",
+          "c5",
+          "c6",
+          "c7",
+          "c8",
+          "c9",
+          "c19",
+          "c20",
+          "c24",
+          "c34"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "n": 1,
+        "title": "Get a tenant account with the right role",
+        "detail_md": "Sign in to the Entra admin center (entra.microsoft.com responded normally in our probe) with an account that has **at least the Application Developer role**. Without it you cannot register the app. If you will also change tenant consent settings, that needs **Privileged Role Administrator** (Global Administrator only when doing it through the admin center).",
+        "actor": "developer",
+        "claim_ids": [
+          "c12",
+          "c37",
+          "c39",
+          "c11",
+          "c23"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 15
+      },
+      {
+        "n": 2,
+        "title": "Lay out the account-type decision",
+        "detail_md": "The Supported account types choice decides who can use the app. Microsoft recommends **single tenant** for most apps. The **multitenant** option is meant for SaaS apps offered to multiple organizations, which is what an agent product connecting other companies' users usually is. Also note: once created, an app registration **cannot be moved between tenants**, so pick the tenant that will own it long term. The agent writes this up; it does not decide.",
+        "actor": "agent",
+        "claim_ids": [
+          "c15",
+          "c38",
+          "c16",
+          "c17"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 3,
+        "title": "Decide account type and owning tenant",
+        "detail_md": "Choose single tenant or multitenant, and which tenant owns the registration. This changes who can use the app and the tenant cannot be changed later, so it is your call. My opinion: if outside organizations will connect, multitenant is the documented fit.",
+        "actor": "developer",
+        "claim_ids": [
+          "c15",
+          "c16",
+          "c17"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 4,
+        "title": "Draft app name and redirect URIs",
+        "detail_md": "Draft the display name (users see it; it can be changed any time and duplicates are allowed, so it is low stakes). List every redirect URI your backend will use. The redirect_uri sent at runtime must **exactly match** a registered one. For native apps the recommended values are the nativeclient URL or http://localhost.",
+        "actor": "agent",
+        "claim_ids": [
+          "c14",
+          "c30"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 5,
+        "title": "Create the app registration",
+        "detail_md": "In the Entra admin center go to **App registrations > New registration**, enter the name, the account type you chose, and the redirect URIs. After creation, copy the **Application (client) ID** from the Overview page.",
+        "actor": "developer",
+        "claim_ids": [
+          "c13",
+          "c18",
+          "c30"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 6,
+        "title": "Add a credential",
+        "detail_md": "For a confidential (server-side) client, Microsoft recommends a **certificate** over a client secret. Public clients must not use secrets or certificates. Uploading the credential requires your login. The exact portal path for credentials is not covered by our sources.",
+        "actor": "developer",
+        "claim_ids": [
+          "c33"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 15
+      },
+      {
+        "n": 7,
+        "title": "Pick permissions that avoid admin consent where possible",
+        "detail_md": "Plan the permission set. All **application permissions** (app-only access) and many high-privilege delegated permissions need **admin consent**; some are admin-restricted, for example Directory.ReadWrite.All. Custom application scopes are not treated as high-privilege. For an agent acting for a user, prefer delegated, low-impact permissions so ordinary users can consent. Request **offline_access** if you need refresh tokens.",
+        "actor": "agent",
+        "claim_ids": [
+          "c8",
+          "c9",
+          "c35",
+          "c36",
+          "c34",
+          "c10",
+          "c32"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 15
+      },
+      {
+        "n": 8,
+        "title": "Write the OAuth integration code",
+        "detail_md": "Use authorization code flow with **PKCE** (recommended for all app types, required for SPAs; S256 and plain supported, use S256). Microsoft recommends its authentication libraries over raw HTTP. Start at the tenant-scoped v2.0 **/authorize** endpoint and exchange codes at **POST /{tenant}/oauth2/v2.0/token** on login.microsoftonline.com. Tenant values: common, organizations, consumers, or a tenant identifier. Our probe of login.microsoftonline.com/common/oauth2/v2.0/authorize returned the sign-in page. Do not look for a discovery document on microsoft.com: both well-known paths returned 404. Exchange codes immediately (they expire after about 1 minute); access tokens in the example last about 1 hour, refresh tokens are long-lived.",
+        "actor": "agent",
+        "claim_ids": [
+          "c28",
+          "c29",
+          "c25",
+          "c26",
+          "c27",
+          "c42",
+          "c40",
+          "c41",
+          "c31",
+          "c32"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 120
+      },
+      {
+        "n": 9,
+        "title": "Test sign-in end to end in your own tenant",
+        "detail_md": "Run the full flow with a test user. If your app lives in an **external tenant**, an admin must first grant admin consent for the default **User.Read** permission on behalf of all users. If your app requires user assignment, an admin must consent to its permissions regardless of user consent policy.",
+        "actor": "developer",
+        "claim_ids": [
+          "c20",
+          "c5"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 30
+      },
+      {
+        "n": 10,
+        "title": "Optionally make the app visible on My Apps",
+        "detail_md": "New registrations are hidden from users on My Apps by default. If you want it listed, an admin sets **Visible to users?** to Yes under Enterprise apps > Properties.",
+        "actor": "developer",
+        "claim_ids": [
+          "c19"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      },
+      {
+        "n": 11,
+        "title": "Draft a consent guide for customer tenant admins",
+        "detail_md": "Write onboarding copy for customers. By default users can consent to permissions that do not require admin consent, but Microsoft recommends allowing user consent only for **verified-publisher** apps, and the built-in policy microsoft-user-default-low limits user consent to verified-publisher apps (and apps registered in the tenant) and low-impact permissions. So in many tenants your users will be blocked until an admin approves. Explain the **admin consent workflow**, which lets users request admin review. Changing consent settings only affects future consent; existing grants stay. How to become a verified publisher is **not covered** by our sources; check before launch.",
+        "actor": "agent",
+        "claim_ids": [
+          "c1",
+          "c21",
+          "c2",
+          "c22",
+          "c3",
+          "c4",
+          "c7",
+          "c24",
+          "c6"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 30
+      },
+      {
+        "n": 12,
+        "title": "Wait for customer admin approval (per tenant)",
+        "detail_md": "When a user's tenant blocks consent, their admin reviews the request via the admin consent workflow. This time is owned by the other side, not you. **Duration is not documented** (wait unknown; the 0 minutes here is a placeholder, not an estimate). No Microsoft-run app review step is described in our sources.",
+        "actor": "provider_wait",
+        "claim_ids": [
+          "c7",
+          "c24",
+          "c36"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 0
+      }
+    ],
+    "status": "full",
+    "difficulty": {
+      "drivers": [
+        "tenant admin consent for directory permissions",
+        "verified publisher expected by restrictive tenants",
+        "irreversible tenant and account-type choice"
+      ],
+      "score": 4,
+      "level": "hours"
+    },
+    "composio": {
+      "toolkit_slug": "microsoft-entra-id",
+      "tool_count": null,
+      "managed_auth": false,
+      "auth_config_fields": [],
+      "redirect_uri": null
+    },
+    "provenance": {
+      "claims": [
+        {
+          "id": "c1",
+          "text": "By default, all users can consent to apps for permissions that don't require administrator consent.",
+          "evidence_ids": [
+            "e1"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2025-06-24",
+          "stale": false
+        },
+        {
+          "id": "c2",
+          "text": "Microsoft recommends allowing user consent only for apps from verified publishers.",
+          "evidence_ids": [
+            "e2"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": "2025-06-24",
+          "stale": false
+        },
+        {
+          "id": "c3",
+          "text": "The built-in policy microsoft-user-default-low limits user consent to verified-publisher apps (and apps registered in the tenant) and to permissions classified as low impact.",
+          "evidence_ids": [
+            "e3"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2025-06-24",
+          "stale": false
+        },
+        {
+          "id": "c4",
+          "text": "The legacy policy lets users consent to any app for any permission that doesn't require admin consent.",
+          "evidence_ids": [
+            "e4"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2025-06-24",
+          "stale": false
+        },
+        {
+          "id": "c5",
+          "text": "Apps that require user assignment must have their permissions consented by an administrator, even if user consent policies would otherwise allow it.",
+          "evidence_ids": [
+            "e5"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "blocker",
+          "last_seen_date": "2025-06-24",
+          "stale": false
+        },
+        {
+          "id": "c6",
+          "text": "Changing a tenant's user consent settings affects only future consent operations. Existing grants stay in place.",
+          "evidence_ids": [
+            "e6"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": "2025-06-24",
+          "stale": false
+        },
+        {
+          "id": "c7",
+          "text": "An admin consent workflow lets users request admin review and approval of apps they can't consent to themselves.",
+          "evidence_ids": [
+            "e7"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": "2025-06-24",
+          "stale": false
+        },
+        {
+          "id": "c8",
+          "text": "Application permissions can generally be consented to only by an admin or by the owner of the API's service principal.",
+          "evidence_ids": [
+            "e8"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": "2025-03-18",
+          "stale": false
+        },
+        {
+          "id": "c9",
+          "text": "Many high-privilege delegated permissions, as well as all application permissions, require administrator consent.",
+          "evidence_ids": [
+            "e9"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": "2025-03-18",
+          "stale": false
+        },
+        {
+          "id": "c10",
+          "text": "Custom application scopes are not treated as high-privilege and don't require admin consent.",
+          "evidence_ids": [
+            "e10"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": "2025-03-18",
+          "stale": false
+        },
+        {
+          "id": "c11",
+          "text": "Configuring tenant user consent requires the Privileged Role Administrator role (Global Administrator is needed only for the admin center).",
+          "evidence_ids": [
+            "e11"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": "2025-06-24",
+          "stale": false
+        },
+        {
+          "id": "c12",
+          "text": "Registering an app requires at least the Application Developer role.",
+          "evidence_ids": [
+            "e12"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": "2026-06-05",
+          "stale": false
+        },
+        {
+          "id": "c13",
+          "text": "Apps are registered in the Entra admin center under App registrations, using New registration.",
+          "evidence_ids": [
+            "e13"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": "2026-06-05",
+          "stale": false
+        },
+        {
+          "id": "c14",
+          "text": "The app Name is shown to users and can be changed at any time. Duplicate names are allowed.",
+          "evidence_ids": [
+            "e14"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": "2026-06-05",
+          "stale": false
+        },
+        {
+          "id": "c15",
+          "text": "The Supported account types choice sets who can use the app. Single tenant only is recommended for most apps.",
+          "evidence_ids": [
+            "e15"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": "2026-06-05",
+          "stale": false
+        },
+        {
+          "id": "c16",
+          "text": "The multitenant option is intended for SaaS apps offered to multiple organizations.",
+          "evidence_ids": [
+            "e16"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": "2026-06-05",
+          "stale": false
+        },
+        {
+          "id": "c17",
+          "text": "Once created, an app registration cannot be moved between tenants.",
+          "evidence_ids": [
+            "e17"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": "2026-06-05",
+          "stale": false
+        },
+        {
+          "id": "c18",
+          "text": "The Application (client) ID appears on the Overview page after registration.",
+          "evidence_ids": [
+            "e18"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": "2026-06-05",
+          "stale": false
+        },
+        {
+          "id": "c19",
+          "text": "New app registrations are hidden from users on My Apps by default. An admin must set Visible to users? to Yes under Enterprise apps > Properties.",
+          "evidence_ids": [
+            "e19"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2026-06-05",
+          "stale": false
+        },
+        {
+          "id": "c20",
+          "text": "In external tenants, an admin must grant admin consent for the default User.Read permission on behalf of all users.",
+          "evidence_ids": [
+            "e20"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": "2026-06-05",
+          "stale": false
+        },
+        {
+          "id": "c21",
+          "text": "By default users can consent to apps for permissions that do not require administrator consent.",
+          "evidence_ids": [
+            "e21"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2025-06-24",
+          "stale": false
+        },
+        {
+          "id": "c22",
+          "text": "Microsoft recommends allowing user consent only for apps from verified publishers.",
+          "evidence_ids": [
+            "e22"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": "2025-06-24",
+          "stale": false
+        },
+        {
+          "id": "c23",
+          "text": "Configuring user consent settings requires the Privileged Role Administrator role. Global Administrator is needed only when using the admin center.",
+          "evidence_ids": [
+            "e23"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": "2025-06-24",
+          "stale": false
+        },
+        {
+          "id": "c24",
+          "text": "Tenant admins can enable the admin consent workflow so users can request admin review and approval of apps they can't consent to.",
+          "evidence_ids": [
+            "e24"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": "2025-06-24",
+          "stale": false
+        },
+        {
+          "id": "c25",
+          "text": "The authorization code flow starts at the /authorize endpoint, which has a tenant-scoped v2.0 path.",
+          "evidence_ids": [
+            "e25"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": "2026-01-09",
+          "stale": false
+        },
+        {
+          "id": "c26",
+          "text": "The token endpoint is POST /{tenant}/oauth2/v2.0/token on login.microsoftonline.com.",
+          "evidence_ids": [
+            "e26"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": "2026-01-09",
+          "stale": false
+        },
+        {
+          "id": "c27",
+          "text": "Valid tenant values in the endpoint path are common, organizations, consumers, and tenant identifiers.",
+          "evidence_ids": [
+            "e27"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": "2026-01-09",
+          "stale": false
+        },
+        {
+          "id": "c28",
+          "text": "Auth code flow with PKCE is the flow for SPAs, web apps, and desktop/mobile apps. Microsoft recommends using its authentication libraries instead of raw HTTP requests.",
+          "evidence_ids": [
+            "e28"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": "2026-01-09",
+          "stale": false
+        },
+        {
+          "id": "c29",
+          "text": "PKCE is recommended for all app types and required for SPAs. Both S256 and plain are supported.",
+          "evidence_ids": [
+            "e29"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2026-01-09",
+          "stale": false
+        },
+        {
+          "id": "c30",
+          "text": "The redirect_uri must exactly match a registered one. For native apps, the recommended values are the nativeclient URL or http://localhost.",
+          "evidence_ids": [
+            "e30"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": "2026-01-09",
+          "stale": false
+        },
+        {
+          "id": "c31",
+          "text": "Authorization codes are short-lived and expire after about 1 minute.",
+          "evidence_ids": [
+            "e31"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "time",
+          "last_seen_date": "2026-01-09",
+          "stale": false
+        },
+        {
+          "id": "c32",
+          "text": "The access token response shows expires_in of 3599 seconds (about 1 hour) in the example. Refresh tokens are long-lived and are returned only if offline_access is requested.",
+          "evidence_ids": [
+            "e32"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "time",
+          "last_seen_date": "2026-01-09",
+          "stale": false
+        },
+        {
+          "id": "c33",
+          "text": "Microsoft recommends certificate credentials over client secrets for confidential clients. Public clients must not use secrets or certificates.",
+          "evidence_ids": [
+            "e33"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2026-01-09",
+          "stale": false
+        },
+        {
+          "id": "c34",
+          "text": "Some permissions are admin-restricted. Example: Directory.ReadWrite.All.",
+          "evidence_ids": [
+            "e34"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": "2026-01-09",
+          "stale": false
+        },
+        {
+          "id": "c35",
+          "text": "Entra offers an alternative to delegated access: app-only access with application permissions (app roles), which only an admin can consent to.",
+          "evidence_ids": [
+            "e35"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": "2025-03-18",
+          "stale": false
+        },
+        {
+          "id": "c36",
+          "text": "Application permissions and many high-privilege delegated permissions require admin consent.",
+          "evidence_ids": [
+            "e36"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": "2025-03-18",
+          "stale": false
+        },
+        {
+          "id": "c37",
+          "text": "Registering an app requires at least the Application Developer role.",
+          "evidence_ids": [
+            "e37"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": "2026-05-14",
+          "stale": false
+        },
+        {
+          "id": "c38",
+          "text": "Microsoft recommends single-tenant registration for most apps.",
+          "evidence_ids": [
+            "e38"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": "2026-05-14",
+          "stale": false
+        },
+        {
+          "id": "c39",
+          "text": "Probe: GET https://entra.microsoft.com returned HTTP 200 -> https://entra.microsoft.com/",
+          "evidence_ids": [
+            "e39"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c40",
+          "text": "Probe: GET https://www.microsoft.com/.well-known/openid-configuration returned HTTP 404: no discovery document on microsoft.com",
+          "evidence_ids": [
+            "e40"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c41",
+          "text": "Probe: GET https://www.microsoft.com/.well-known/oauth-authorization-server returned HTTP 404: no discovery document on microsoft.com",
+          "evidence_ids": [
+            "e41"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c42",
+          "text": "Probe: GET https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=cliff-probe-nonexistent&redirect_uri=https://example.invalid/callback returned HTTP 200 -> https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=cliff-probe-nonexistent&response_type=code&redi |  Sign in to your account ",
+          "evidence_ids": [
+            "e42"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+          "quote": "By default, all users are allowed to consent to applications for permissions that don't require administrator consent.",
+          "fetched_at": "2026-11-04T12:03:32.272Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e2",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+          "quote": "we recommend that you allow user consent only for applications that have been published by a verified publisher",
+          "fetched_at": "2026-11-04T12:03:32.272Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e3",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+          "quote": "Allow limited user consent only for apps from verified publishers and apps that are registered in your tenant, and only for permissions that you classify as *low impact*.",
+          "fetched_at": "2026-11-04T12:03:32.272Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e4",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+          "quote": "This option allows all users to consent to any permission that doesn't require admin consent, for any application",
+          "fetched_at": "2026-11-04T12:03:32.272Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e5",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+          "quote": "Applications that require users to be assigned to the application must have their permissions consented by an administrator",
+          "fetched_at": "2026-11-04T12:03:32.272Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e6",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+          "quote": "Any updates to user consent settings only affect future consent operations for applications.",
+          "fetched_at": "2026-11-04T12:03:32.272Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e7",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+          "quote": "To allow users to request an administrator's review and approval of an application that the user isn't allowed to consent to, enable the admin consent workflow.",
+          "fetched_at": "2026-11-04T12:03:32.272Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 0.95,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e8",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview",
+          "quote": "In general, only an administrator or owner of an API's service principal can consent to application permissions exposed by that API.",
+          "fetched_at": "2026-11-04T12:03:32.272Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e9",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview",
+          "quote": "application permissions and many high-privilege delegated permissions can only be consented to by an administrator.",
+          "fetched_at": "2026-11-04T12:03:32.272Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e10",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview",
+          "quote": "Permission requests that contain custom application scopes aren't considered high-privilege and thus, they don't require admin consent.",
+          "fetched_at": "2026-11-04T12:03:32.272Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e11",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+          "quote": "A Global Administrator role is only required when using the Microsoft Entra admin center.",
+          "fetched_at": "2026-11-04T12:03:32.272Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e12",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "The Azure account must be at least an [Application Developer]",
+          "fetched_at": "2026-11-04T12:03:32.768Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e13",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "Browse to **Entra ID** > **App registrations** and select **New registration**.",
+          "fetched_at": "2026-11-04T12:03:32.768Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e14",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "App users can see this name, and you can change it at any time. You can have multiple app registrations with the same name.",
+          "fetched_at": "2026-11-04T12:03:32.768Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e15",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "We recommend **Single tenant only - <your tenant>** for most applications.",
+          "fetched_at": "2026-11-04T12:03:32.769Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e16",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "Ideal for software-as-a-service (SaaS) applications that you intend to provide to multiple organizations.",
+          "fetched_at": "2026-11-04T12:03:32.769Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e17",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "Once created, you can't move the application object between different tenants.",
+          "fetched_at": "2026-11-04T12:03:32.769Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e18",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "The application's **Overview** page is displayed. Record the **Application (client) ID**",
+          "fetched_at": "2026-11-04T12:03:32.769Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e19",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "New app registrations are hidden to users by default.",
+          "fetched_at": "2026-11-04T12:03:32.769Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e20",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "Select **Grant admin consent for < tenant name >**, then select **Yes**.",
+          "fetched_at": "2026-11-04T12:03:32.769Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e21",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+          "quote": "By default, all users are allowed to consent to applications for permissions that don't require administrator consent.",
+          "fetched_at": "2026-11-04T12:03:32.769Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e22",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+          "quote": "we recommend that you allow user consent only for applications that have been published by a [verified publisher]",
+          "fetched_at": "2026-11-04T12:03:32.769Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e23",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+          "quote": "A [Global Administrator](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#global-administrator) role is only required when using the Microsoft Entra admin center.",
+          "fetched_at": "2026-11-04T12:03:32.769Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e24",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+          "quote": "To allow users to request an administrator's review and approval of an application that the user isn't allowed to consent to, [enable the admin consent workflow]",
+          "fetched_at": "2026-11-04T12:03:32.769Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e25",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow",
+          "quote": "The authorization code flow begins with the client directing the user to the `/authorize` endpoint.",
+          "fetched_at": "2026-11-04T12:03:34.344Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e26",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow",
+          "quote": "POST /{tenant}/oauth2/v2.0/token HTTP/1.1",
+          "fetched_at": "2026-11-04T12:03:34.344Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e27",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow",
+          "quote": "Valid values are `common`, `organizations`, `consumers`, and tenant identifiers.",
+          "fetched_at": "2026-11-04T12:03:34.344Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e28",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow",
+          "quote": "Use the auth code flow paired with Proof Key for Code Exchange (PKCE) and OpenID Connect (OIDC) to get access tokens and ID tokens in these types of apps:",
+          "fetched_at": "2026-11-04T12:03:34.344Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e29",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow",
+          "quote": "The Microsoft identity platform supports both `plain` and `S256`.",
+          "fetched_at": "2026-11-04T12:03:34.344Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e30",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow",
+          "quote": "It must exactly match one of the redirect URIs you registered in the Microsoft Entra admin center, except it must be URL-encoded.",
+          "fetched_at": "2026-11-04T12:03:34.344Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e31",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow",
+          "quote": "Authorization codes are short lived. Typically, they expire after about 1 minute.",
+          "fetched_at": "2026-11-04T12:03:34.344Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e32",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow",
+          "quote": "Only provided if `offline_access` scope was requested.",
+          "fetched_at": "2026-11-04T12:03:34.344Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e33",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow",
+          "quote": "For best security, we recommend using certificate credentials.",
+          "fetched_at": "2026-11-04T12:03:34.344Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e34",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow",
+          "quote": "Some permissions are admin-restricted, for example, writing data to an organization's directory by using `Directory.ReadWrite.All`.",
+          "fetched_at": "2026-11-04T12:03:34.344Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e35",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview",
+          "quote": "App-only access uses app roles instead of delegated scopes.",
+          "fetched_at": "2026-11-04T12:03:34.345Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e36",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview",
+          "quote": "application permissions and many high-privilege delegated permissions can only be consented to by an administrator.",
+          "fetched_at": "2026-11-04T12:03:34.345Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e37",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "The Azure account must be at least an [Application Developer]",
+          "fetched_at": "2026-11-04T12:03:34.345Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e38",
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "We recommend **Single tenant only - <your tenant>** for most applications.",
+          "fetched_at": "2026-11-04T12:03:34.345Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e39",
+          "url": "https://entra.microsoft.com",
+          "quote": "HTTP 200 -> https://entra.microsoft.com/",
+          "fetched_at": "2026-11-04T12:03:21.450Z",
+          "kind": "console_probe",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e40",
+          "url": "https://www.microsoft.com/.well-known/openid-configuration",
+          "quote": "HTTP 404: no discovery document on microsoft.com",
+          "fetched_at": "2026-11-04T12:03:22.351Z",
+          "kind": "well_known",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e41",
+          "url": "https://www.microsoft.com/.well-known/oauth-authorization-server",
+          "quote": "HTTP 404: no discovery document on microsoft.com",
+          "fetched_at": "2026-11-04T12:03:23.302Z",
+          "kind": "well_known",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e42",
+          "url": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+          "quote": "HTTP 200 -> https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=cliff-probe-nonexistent&response_type=code&redi |  Sign in to your account ",
+          "fetched_at": "2026-11-04T12:03:23.845Z",
+          "kind": "console_probe",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        }
+      ],
+      "attempt_log": [
+        {
+          "id": "a_probe_1",
+          "at": "2026-11-04T12:03:21.450Z",
+          "mode": "probe",
+          "action": "GET https://entra.microsoft.com",
+          "observed": "HTTP 200 -> https://entra.microsoft.com/",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c39"
+          ]
+        },
+        {
+          "id": "a_probe_2",
+          "at": "2026-11-04T12:03:22.351Z",
+          "mode": "probe",
+          "action": "GET https://www.microsoft.com/.well-known/openid-configuration",
+          "observed": "HTTP 404: no discovery document on microsoft.com",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c40"
+          ]
+        },
+        {
+          "id": "a_probe_3",
+          "at": "2026-11-04T12:03:23.302Z",
+          "mode": "probe",
+          "action": "GET https://www.microsoft.com/.well-known/oauth-authorization-server",
+          "observed": "HTTP 404: no discovery document on microsoft.com",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c41"
+          ]
+        },
+        {
+          "id": "a_probe_4",
+          "at": "2026-11-04T12:03:23.845Z",
+          "mode": "probe",
+          "action": "GET https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=cliff-probe-nonexistent&redirect_uri=https://example.invalid/callback",
+          "observed": "HTTP 200 -> https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=cliff-probe-nonexistent&response_type=code&redi |  Sign in to your account ",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c42"
+          ]
+        }
+      ],
+      "corrections": [],
+      "belief_diff": [
+        {
+          "topic": "Does letting arbitrary users connect require provider review or verification?",
+          "prior_belief": "No, for Microsoft Entra ID multi-tenant apps any user in a tenant can consent to basic permissions without Microsoft review, but publisher verification is recommended and required for certain consent flows and for appearing as verified.",
+          "finding": "Claims confirm that by default users can consent to permissions not requiring admin consent and that Microsoft recommends allowing user consent only for verified-publisher apps, but none of the claims state that publisher verification is required for certain consent flows or describe what verification displays.",
+          "verdict": "refined",
+          "claim_ids": [
+            "c1",
+            "c2",
+            "c21",
+            "c3"
+          ]
+        },
+        {
+          "topic": "Typical approval wait time",
+          "prior_belief": "Publisher verification through the Microsoft Partner Center typically completes in about 3 to 5 business days.",
+          "finding": "No claim addresses publisher verification processing time.",
+          "verdict": "could_not_verify",
+          "claim_ids": []
+        },
+        {
+          "topic": "Limits while the app is unapproved",
+          "prior_belief": "Unverified apps can still be used by any user in any tenant, but tenant admins see an unverified publisher warning and users may be blocked from consenting to apps requesting high-privilege permissions.",
+          "finding": "Claims say the built-in microsoft-user-default-low policy limits user consent to verified-publisher apps (or apps registered in the tenant) and low-impact permissions, and that high-privilege and application permissions require admin consent; they do not mention an unverified publisher warning or that unverified apps are usable by any tenant user.",
+          "verdict": "refined",
+          "claim_ids": [
+            "c3",
+            "c9",
+            "c36",
+            "c4"
+          ]
+        },
+        {
+          "topic": "Fees or paid requirements",
+          "prior_belief": "There is no fee; publisher verification and app registration in Entra ID are free of charge.",
+          "finding": "No claim addresses fees or cost for app registration or publisher verification.",
+          "verdict": "could_not_verify",
+          "claim_ids": []
+        },
+        {
+          "topic": "Key prerequisites (domain, privacy policy, video, business verification)",
+          "prior_belief": "You need a verified custom domain, a Microsoft Partner Center account linked to a verified organization with a valid MPN ID, a public privacy policy URL, and a publisher domain matching the app homepage, but no demo video is required.",
+          "finding": "Claims mention only that Microsoft recommends verified-publisher apps and do not list domain, MPN ID, privacy policy, publisher domain, or video requirements.",
+          "verdict": "could_not_verify",
+          "claim_ids": [
+            "c2"
+          ]
+        },
+        {
+          "topic": "Redirect URI rules",
+          "prior_belief": "Redirect URIs must use HTTPS except for localhost, must exactly match the registered value including path and case-sensitive query parameters, and can be up to 256 characters each.",
+          "finding": "Claims confirm the redirect_uri must exactly match a registered one and that native apps may use the nativeclient URL or http://localhost; they do not address the HTTPS rule or the 256-character length limit.",
+          "verdict": "refined",
+          "claim_ids": [
+            "c30"
+          ]
+        }
+      ],
+      "sources_searched": [
+        "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow",
+        "https://learn.microsoft.com/en-us/entra/identity-platform/v2-app-types",
+        "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+        "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview",
+        "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent",
+        "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/manage-app-consent-policies",
+        "https://help.merge.dev/articles/2543780893-sharepoint-onedrive-partnership"
+      ],
+      "uncertain": []
+    }
+  }
+}
