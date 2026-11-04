@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
 import { Baloo_2, Caveat, Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { Pip } from "@/components/brand/Mascot";
 import "./globals.css";
 
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <span className="font-hand text-xl text-butter">built for agent builders, checked by agents</span>
           </div>
         </footer>
+        <Analytics />
       </body>
     </html>
   );
