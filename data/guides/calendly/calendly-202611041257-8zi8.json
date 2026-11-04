@@ -1,0 +1,1677 @@
+{
+  "versionId": "calendly-202611041257-8zi8",
+  "slug": "calendly",
+  "created_at": "2026-11-04T12:57:37.744Z",
+  "created_by": "live",
+  "cost_usd": 0.42305740000000003,
+  "guide": {
+    "app": {
+      "name": "Calendly",
+      "slug": "calendly",
+      "homepage": "https://calendly.com",
+      "developer_portal": "https://developer.calendly.com"
+    },
+    "summary": "Calendly OAuth is self-serve. Any Calendly user can create an OAuth app in Developer tools, and the docs describe no review step before it can access other users' data. The setup itself is easy, but a few details catch people out. PKCE with S256 is mandatory for every app, including server-side ones, which must also send the client secret. Each app takes exactly one redirect URI. The client ID, client secret and webhook signing key are shown only once. Plan for per-user rate limits, including a cap on OAuth token requests.",
+    "has_oauth": true,
+    "auth_alternatives": [],
+    "build_or_borrow": {
+      "composio_managed": true,
+      "composio_slug": "calendly",
+      "reasons_to_bring_own": [
+        "Each app gets its own webhook signing key at creation. If you want to verify Calendly webhooks against a key you control, you need your own app.",
+        "Creating your own app needs no provider review, so switching from managed auth later costs little beyond a short setup."
+      ],
+      "agent_access_allowed": "unknown",
+      "verdict": "Use Composio managed auth to start; you do not need your own app yet because Calendly has no review step, so you can create your own app in minutes whenever you need your own webhook signing key or control of the redirect URI."
+    },
+    "time": {
+      "hands_on_minutes": 82,
+      "approval_required": false,
+      "approval_wait_days_min": null,
+      "approval_wait_days_max": null,
+      "unapproved_usable": true,
+      "claim_ids": [
+        "c1",
+        "c11",
+        "c12"
+      ]
+    },
+    "prerequisites": [
+      {
+        "text": "A Calendly account to log in to Developer tools.",
+        "claim_ids": [
+          "c12",
+          "c1"
+        ]
+      },
+      {
+        "text": "A redirect URI decided in advance. Production apps accept only https. Sandbox apps also accept http on localhost.",
+        "claim_ids": [
+          "c6",
+          "c14",
+          "c28",
+          "c29"
+        ]
+      },
+      {
+        "text": "At least one scope chosen at creation.",
+        "claim_ids": [
+          "c5",
+          "c17",
+          "c31"
+        ]
+      },
+      {
+        "text": "Integration code that implements PKCE with S256.",
+        "claim_ids": [
+          "c8",
+          "c16",
+          "c25"
+        ]
+      },
+      {
+        "text": "A secure place to store the client ID, client secret and webhook signing key right away, because they are shown only once.",
+        "claim_ids": [
+          "c7",
+          "c33"
+        ]
+      }
+    ],
+    "oauth": {
+      "flow": "authorization_code_pkce",
+      "authorize_url": "https://calendly.com/oauth/authorize",
+      "token_url": "https://auth.calendly.com/oauth/token",
+      "pkce": "required",
+      "refresh_tokens": "unknown",
+      "token_lifetime": null,
+      "redirect_uri_rules": [
+        "Exactly one redirect URI per app.",
+        "Production apps accept only https redirect URIs.",
+        "Sandbox apps accept https redirect URIs and http on localhost."
+      ],
+      "claim_ids": [
+        "c24",
+        "c25",
+        "c27",
+        "c38",
+        "c3",
+        "c15",
+        "c30",
+        "c6",
+        "c14",
+        "c28",
+        "c29",
+        "c32"
+      ]
+    },
+    "blockers": [
+      {
+        "text": "The client ID, client secret and webhook signing key are shown only once, and the client ID cannot be viewed again in Developer tools.",
+        "workaround": "Copy all three into your secret store before closing the creation screen.",
+        "severity": "med",
+        "claim_ids": [
+          "c7",
+          "c18",
+          "c33"
+        ]
+      },
+      {
+        "text": "Only one redirect URI per app, so local and production callbacks cannot share an app.",
+        "workaround": "Follow Calendly's advice: use a Sandbox app for development and create a second app for Production.",
+        "severity": "med",
+        "claim_ids": [
+          "c3",
+          "c15",
+          "c30",
+          "c34"
+        ]
+      },
+      {
+        "text": "Only 8 OAuth tokens can be requested per user per minute.",
+        "workaround": "Cache tokens per user and avoid re-running the token exchange in retry loops.",
+        "severity": "low",
+        "claim_ids": [
+          "c21",
+          "c36"
+        ]
+      },
+      {
+        "text": "Deleting an OAuth app cannot be undone.",
+        "workaround": "Edit the existing app instead, since its name, redirect URI, environment type and scopes can all be changed.",
+        "severity": "low",
+        "claim_ids": [
+          "c10",
+          "c9"
+        ]
+      }
+    ],
+    "app_specific_gotchas": [
+      {
+        "text": "PKCE with S256 is mandatory even for server-side apps, which must also send the client secret via HTTP Basic auth during the code exchange. An authorization request with no code challenge fails.",
+        "claim_ids": [
+          "c8",
+          "c25",
+          "c32"
+        ]
+      },
+      {
+        "text": "The client ID cannot be viewed again in Developer tools after creation, along with the secret and webhook signing key.",
+        "claim_ids": [
+          "c33"
+        ]
+      },
+      {
+        "text": "Exactly one redirect URI per app.",
+        "claim_ids": [
+          "c3",
+          "c15",
+          "c30"
+        ]
+      },
+      {
+        "text": "Rate limits are per user and depend on that user's plan: 500 requests per minute on paid plans, but only 50 on the free plan. They apply to third-party integrations too.",
+        "claim_ids": [
+          "c35",
+          "c19",
+          "c20",
+          "c23"
+        ]
+      },
+      {
+        "text": "On the Trial tier, Create Event Invitee is limited to 5 requests per user per day.",
+        "claim_ids": [
+          "c22"
+        ]
+      }
+    ],
+    "agent_vs_human": {
+      "agent_can": [
+        "Write the authorization code + PKCE (S256) integration, including Basic-auth client secret on the token exchange.",
+        "List the redirect URIs needed for the Sandbox and Production apps.",
+        "Draft the minimal scope list and explain the trade-offs.",
+        "Implement per-user rate limit handling and token caching."
+      ],
+      "human_must": [
+        "Log in to Calendly and open Developer tools.",
+        "Create the Sandbox and Production OAuth apps.",
+        "Choose environment type and scopes for each app.",
+        "Copy the client ID, client secret and webhook signing key into a secret store at creation.",
+        "Decide on any app deletion, which cannot be undone."
+      ]
+    },
+    "artifacts": [
+      {
+        "kind": "redirect_uri_list",
+        "label": "One redirect URI each for the Sandbox (localhost allowed) and Production (https) apps"
+      },
+      {
+        "kind": "scope_justification",
+        "label": "Minimal scope selection notes for app creation"
+      }
+    ],
+    "cliff": {
+      "scope_tiers": [
+        {
+          "scope": "Not documented in the provided claims",
+          "purpose": "Whatever Calendly data the agent reads or writes (event types, scheduled events, invitees). The claims do not name any scope strings.",
+          "action_label": "Pick at least one scope at app creation",
+          "tier": "unknown",
+          "gate": "No review gate is described. The only rule is that at least one scope must be selected, and scopes can be changed later. Look up exact scope names in Calendly Developer tools before building.",
+          "cheaper_alternative": null,
+          "claim_ids": [
+            "c5",
+            "c17",
+            "c31",
+            "c9",
+            "c11"
+          ]
+        }
+      ],
+      "paths": [
+        {
+          "distribution": "internal",
+          "verdict": "Easy. A Sandbox app for your own testing needs only a Calendly account. No review step is described. It allows http on localhost, and PKCE S256 is mandatory.",
+          "total_days_min": 0,
+          "total_days_max": 1,
+          "nodes": [
+            {
+              "id": "i1",
+              "title": "Log in to a Calendly account and open Developer tools",
+              "actor": "developer",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c12",
+                "c1"
+              ]
+            },
+            {
+              "id": "i2",
+              "title": "Pick the single redirect URI for Sandbox (https, or http on localhost)",
+              "actor": "agent",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c3",
+                "c15",
+                "c30",
+                "c28",
+                "c6"
+              ]
+            },
+            {
+              "id": "i3",
+              "title": "Write the auth code flow with PKCE S256 and the token exchange, using Basic auth with the client secret for server-side apps",
+              "actor": "agent",
+              "est_minutes": 120,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c24",
+                "c25",
+                "c8",
+                "c32",
+                "c27",
+                "c38"
+              ]
+            },
+            {
+              "id": "i4",
+              "title": "Create a Sandbox OAuth app: set name (letters, numbers, hyphens, spaces), redirect URI, and at least one scope",
+              "actor": "developer",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i1",
+                "i2"
+              ],
+              "claim_ids": [
+                "c1",
+                "c2",
+                "c4",
+                "c13",
+                "c5",
+                "c34"
+              ]
+            },
+            {
+              "id": "i5",
+              "title": "Copy the client ID, client secret and webhook signing key into a secret store right away (shown only once)",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i4"
+              ],
+              "claim_ids": [
+                "c7",
+                "c18",
+                "c33"
+              ]
+            },
+            {
+              "id": "i6",
+              "title": "Test the connect flow end to end with your own account",
+              "actor": "developer",
+              "est_minutes": 30,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i3",
+                "i5"
+              ],
+              "claim_ids": [
+                "c25",
+                "c21"
+              ]
+            }
+          ]
+        },
+        {
+          "distribution": "unlisted_public",
+          "verdict": "Easy. Any Calendly user can create a Production app. The docs describe no review or approval before other users can connect. The real work is the PKCE flow, a single https redirect URI, and saving credentials that are shown once. Review timing is not documented because no review is described.",
+          "total_days_min": 0,
+          "total_days_max": 1,
+          "nodes": [
+            {
+              "id": "p1",
+              "title": "Log in to a Calendly account and open Developer tools",
+              "actor": "developer",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c12",
+                "c1"
+              ]
+            },
+            {
+              "id": "p2",
+              "title": "Choose the one https production redirect URI",
+              "actor": "agent",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c3",
+                "c15",
+                "c30",
+                "c14",
+                "c29"
+              ]
+            },
+            {
+              "id": "p3",
+              "title": "Write the auth code flow with PKCE S256 and the token exchange, using Basic auth with the client secret for server-side apps",
+              "actor": "agent",
+              "est_minutes": 120,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c24",
+                "c25",
+                "c16",
+                "c32",
+                "c27",
+                "c38"
+              ]
+            },
+            {
+              "id": "p4",
+              "title": "Create a Sandbox app first and save its one-time credentials",
+              "actor": "developer",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "p1"
+              ],
+              "claim_ids": [
+                "c34",
+                "c4",
+                "c5",
+                "c7",
+                "c33"
+              ]
+            },
+            {
+              "id": "p5",
+              "title": "Test the full connect flow against the Sandbox app",
+              "actor": "developer",
+              "est_minutes": 30,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "p3",
+                "p4"
+              ],
+              "claim_ids": [
+                "c28",
+                "c25"
+              ]
+            },
+            {
+              "id": "p6",
+              "title": "Create a second app with environment type Production, the https redirect URI and the needed scopes",
+              "actor": "developer",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "p2",
+                "p5"
+              ],
+              "claim_ids": [
+                "c34",
+                "c13",
+                "c29",
+                "c31",
+                "c11"
+              ]
+            },
+            {
+              "id": "p7",
+              "title": "Store the Production client ID, secret and webhook signing key immediately (not viewable again)",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "p6"
+              ],
+              "claim_ids": [
+                "c7",
+                "c18",
+                "c33"
+              ]
+            },
+            {
+              "id": "p8",
+              "title": "Ship the connect button and handle rate limits (per-user API and token limits)",
+              "actor": "agent",
+              "est_minutes": 60,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "p7"
+              ],
+              "claim_ids": [
+                "c19",
+                "c20",
+                "c21",
+                "c23"
+              ]
+            }
+          ]
+        }
+      ],
+      "unapproved_mode": {
+        "limits": [
+          "No approval step is documented, so there is no separate unapproved state. Any Calendly user can create an app.",
+          "Sandbox apps are meant for development and testing. They allow http on localhost. Production apps require https.",
+          "Rate limits apply to integrations: 500 requests per user per minute on paid plans and 50 on the free plan.",
+          "Only 8 OAuth tokens per user can be requested within one minute.",
+          "Create Event Invitee is limited to 5 requests per user per day on the Trial tier.",
+          "Each app has exactly one redirect URI."
+        ],
+        "breaks_at": "No approval cliff is documented. The practical break points are: moving to real users needs a Production app with an https redirect URI; losing the one-time client secret or signing key means recreating credentials; and deleting an app cannot be undone.",
+        "claim_ids": [
+          "c11",
+          "c4",
+          "c6",
+          "c19",
+          "c20",
+          "c21",
+          "c22",
+          "c23",
+          "c3",
+          "c7",
+          "c33",
+          "c10"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "n": 1,
+        "title": "Get a Calendly account",
+        "detail_md": "You need a Calendly account to create an OAuth app. Log in or sign up yourself. The agent cannot do this for you.",
+        "actor": "developer",
+        "claim_ids": [
+          "c12"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      },
+      {
+        "n": 2,
+        "title": "Decide on the Sandbox and Production split",
+        "detail_md": "Each app has an environment type: **Sandbox** for development and testing, or **Production** for real users. Calendly recommends starting with a Sandbox app and creating a second app for Production. Do that.\n\nEnvironment type can be changed after creation, so this choice can be undone. The agent can lay out the options. You make the call.",
+        "actor": "developer",
+        "claim_ids": [
+          "c4",
+          "c13",
+          "c34",
+          "c9"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      },
+      {
+        "n": 3,
+        "title": "Draft app name, redirect URI and scope list",
+        "detail_md": "The agent prepares the form values:\n\n- **Name**: letters, numbers, hyphens and spaces only.\n- **Redirect URI**: exactly one per app. Sandbox accepts https, and also http on localhost. Production accepts https only. Use a localhost callback for Sandbox and your real https callback for Production.\n- **Scopes**: you must select at least one. None of the provided claims names specific scopes, so check the scope list in Developer tools against the API calls your agent needs.\n\nName, redirect URI and scopes can all be edited later.",
+        "actor": "agent",
+        "claim_ids": [
+          "c2",
+          "c3",
+          "c15",
+          "c30",
+          "c6",
+          "c14",
+          "c28",
+          "c29",
+          "c5",
+          "c17",
+          "c31",
+          "c9"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 15
+      },
+      {
+        "n": 4,
+        "title": "Create the Sandbox app and save credentials immediately",
+        "detail_md": "1. In Calendly Developer tools, open the **OAuth apps** tab.\n2. Select **Create OAuth app**.\n3. Enter the drafted values and choose **Sandbox**.\n4. Before you leave the page, copy the client ID, client secret and webhook signing key into your secret store.\n\nAll three are shown only once. The client ID also cannot be viewed again in Developer tools. If you lose them, the claims do not describe a recovery path.",
+        "actor": "developer",
+        "claim_ids": [
+          "c1",
+          "c7",
+          "c18",
+          "c33"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 5,
+        "title": "Implement authorization code flow with PKCE S256",
+        "detail_md": "The agent writes the OAuth code.\n\n**Flow**\n\n- Use the authorization code flow with PKCE. PKCE S256 is mandatory, and a request with no code challenge fails.\n\n**Authorize endpoint**\n\n- Take it from the discovery document at `https://calendly.com/.well-known/openid-configuration`. That document lists `https://calendly.com/oauth/authorize` and PKCE method S256.\n- A probe of `auth.calendly.com/oauth/authorize` with a fake client ID redirected to the login page. That probe does not confirm the endpoint, so prefer the discovery value.\n\n**Token exchange**\n\n- POST to `https://auth.calendly.com/oauth/token`.\n- Server-side apps must also send the client secret using HTTP Basic authentication.",
+        "actor": "agent",
+        "claim_ids": [
+          "c24",
+          "c25",
+          "c8",
+          "c16",
+          "c38",
+          "c39",
+          "c27",
+          "c32"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 90
+      },
+      {
+        "n": 6,
+        "title": "Add rate limit handling",
+        "detail_md": "Rate limits apply to third-party integrations, not only direct API calls. Build backoff around these limits:\n\n- **Paid plans**: 500 requests per user per minute.\n- **Free plan**: 50 requests per user per minute.\n- **OAuth tokens**: at most 8 token requests per user per minute, so do not refresh tokens in a loop.\n- **Create Event Invitee on the Trial tier**: 5 requests per user per day.",
+        "actor": "agent",
+        "claim_ids": [
+          "c19",
+          "c20",
+          "c35",
+          "c21",
+          "c36",
+          "c22",
+          "c23"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 30
+      },
+      {
+        "n": 7,
+        "title": "Test end to end against Sandbox",
+        "detail_md": "Run the full connect flow with your own Calendly login against the Sandbox app on the localhost redirect. Confirm that:\n\n- the code exchange succeeds;\n- API calls work with the scopes you chose.",
+        "actor": "developer",
+        "claim_ids": [
+          "c6",
+          "c28",
+          "c25"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 30
+      },
+      {
+        "n": 8,
+        "title": "Create the Production app",
+        "detail_md": "Create a second app in Developer tools with environment type **Production**, an https redirect URI and the same scopes. Save its client ID, secret and webhook signing key at once, because they are shown only once. Then point your deployed integration at these credentials.",
+        "actor": "developer",
+        "claim_ids": [
+          "c34",
+          "c29",
+          "c14",
+          "c1",
+          "c7",
+          "c33"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 15
+      },
+      {
+        "n": 9,
+        "title": "Share with users (no review step documented)",
+        "detail_md": "Any Calendly user can create an OAuth app. The documentation describes no review or approval step before the app can access other users' data, so there is no provider wait to plan for.\n\nIf Calendly does have a review process, it is not documented in the claims. Verify the setup with a second, real user account before a wide launch.",
+        "actor": "developer",
+        "claim_ids": [
+          "c11"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 15
+      },
+      {
+        "n": 10,
+        "title": "Do not delete apps casually",
+        "detail_md": "Deleting an OAuth app cannot be undone. If you need a change, edit the app instead, since name, redirect URI, environment type and scopes are all editable. Only you should decide on a deletion.",
+        "actor": "developer",
+        "claim_ids": [
+          "c10",
+          "c9"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 2
+      }
+    ],
+    "status": "full",
+    "difficulty": {
+      "drivers": [
+        "mandatory PKCE S256 for every app",
+        "single redirect URI per app",
+        "credentials shown only once",
+        "per-user plan-dependent rate limits"
+      ],
+      "score": 2,
+      "level": "instant"
+    },
+    "composio": {
+      "toolkit_slug": "calendly",
+      "tool_count": null,
+      "managed_auth": true,
+      "auth_config_fields": [],
+      "redirect_uri": null
+    },
+    "provenance": {
+      "claims": [
+        {
+          "id": "c1",
+          "text": "OAuth apps are created in Calendly Developer tools, on the OAuth apps tab, by selecting Create OAuth app.",
+          "evidence_ids": [
+            "e1"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c2",
+          "text": "App name accepts only letters, numbers, hyphens, and spaces.",
+          "evidence_ids": [
+            "e2"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c3",
+          "text": "Exactly one redirect URI may be entered.",
+          "evidence_ids": [
+            "e3"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c4",
+          "text": "Environment type is Sandbox for development and testing, or Production for real users.",
+          "evidence_ids": [
+            "e4"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c5",
+          "text": "At least one scope must be selected.",
+          "evidence_ids": [
+            "e5"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c6",
+          "text": "Production redirect URIs must be https only. Sandbox also allows http on localhost.",
+          "evidence_ids": [
+            "e6"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c7",
+          "text": "The client ID, client secret and webhook signing key are shown only once after creation.",
+          "evidence_ids": [
+            "e7"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c8",
+          "text": "PKCE with S256 is mandatory for all OAuth apps.",
+          "evidence_ids": [
+            "e8"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c9",
+          "text": "Name, redirect URI, environment type and scopes can be changed after creation, so none of them is immutable.",
+          "evidence_ids": [
+            "e9"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c10",
+          "text": "Deleting an OAuth app cannot be undone.",
+          "evidence_ids": [
+            "e10"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c11",
+          "text": "Any Calendly user can create an OAuth app from Developer tools. The page describes no review or approval step before the app can access other users' data.",
+          "evidence_ids": [
+            "e11"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c12",
+          "text": "A Calendly account is required to create an OAuth app.",
+          "evidence_ids": [
+            "e12"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c13",
+          "text": "Each app has an environment type: Sandbox for development and testing, or Production for real users.",
+          "evidence_ids": [
+            "e13"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c14",
+          "text": "Production apps accept only https redirect URIs. Sandbox apps also accept http on localhost.",
+          "evidence_ids": [
+            "e14"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c15",
+          "text": "Each app can have only one redirect URI.",
+          "evidence_ids": [
+            "e15"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c16",
+          "text": "PKCE with the S256 method is mandatory for every OAuth app.",
+          "evidence_ids": [
+            "e16"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c17",
+          "text": "At least one scope must be selected when creating an app.",
+          "evidence_ids": [
+            "e17"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c18",
+          "text": "The client secret and webhook signing key are shown only once, at creation.",
+          "evidence_ids": [
+            "e18"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c19",
+          "text": "The rate limit for paid plans is 500 requests per user per minute.",
+          "evidence_ids": [
+            "e19"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c20",
+          "text": "The rate limit for the free plan is 50 requests per user per minute.",
+          "evidence_ids": [
+            "e20"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c21",
+          "text": "Only 8 OAuth tokens can be requested per user within one minute.",
+          "evidence_ids": [
+            "e21"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c22",
+          "text": "The Create Event Invitee endpoint is limited to 5 requests per user per day on the Trial tier.",
+          "evidence_ids": [
+            "e22"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c23",
+          "text": "Rate limits apply to third-party integrations as well as direct API calls.",
+          "evidence_ids": [
+            "e23"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c24",
+          "text": "Calendly OAuth apps must use the authorization code flow with PKCE.",
+          "evidence_ids": [
+            "e24"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c25",
+          "text": "PKCE with the S256 method is mandatory. An authorization request with no code challenge fails.",
+          "evidence_ids": [
+            "e25"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c26",
+          "text": "The authorize endpoint is https://auth.calendly.com/oauth/authorize.",
+          "evidence_ids": [
+            "e26"
+          ],
+          "status": "unverified",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c27",
+          "text": "The token endpoint is https://auth.calendly.com/oauth/token. It takes a POST request.",
+          "evidence_ids": [
+            "e27"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c28",
+          "text": "Sandbox apps allow https redirect URIs and http URIs on localhost.",
+          "evidence_ids": [
+            "e28"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c29",
+          "text": "Production apps allow only https redirect URIs.",
+          "evidence_ids": [
+            "e29"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c30",
+          "text": "Each app takes exactly one redirect URI.",
+          "evidence_ids": [
+            "e30"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c31",
+          "text": "An app must select at least one scope when it is created.",
+          "evidence_ids": [
+            "e31"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c32",
+          "text": "Server-side apps must also send the client secret, using HTTP Basic authentication, when they exchange the code.",
+          "evidence_ids": [
+            "e32"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c33",
+          "text": "The client secret and webhook signing key are shown only once. The client ID also cannot be viewed again in Developer tools.",
+          "evidence_ids": [
+            "e33"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "blocker",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c34",
+          "text": "Calendly recommends starting with a Sandbox app and creating a second app for Production.",
+          "evidence_ids": [
+            "e34"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c35",
+          "text": "The rate limit is 500 requests per user per minute on paid plans and 50 on the free plan.",
+          "evidence_ids": [
+            "e35"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c36",
+          "text": "Only 8 OAuth tokens per user can be requested within 1 minute.",
+          "evidence_ids": [
+            "e36"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c37",
+          "text": "Probe: GET https://developer.calendly.com returned HTTP 200 -> https://developer.calendly.com/docs/getting-started/overview",
+          "evidence_ids": [
+            "e37"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c38",
+          "text": "Probe: GET https://calendly.com/.well-known/openid-configuration returned HTTP 200, discovery document: authorize=https://calendly.com/oauth/authorize, PKCE methods=S256",
+          "evidence_ids": [
+            "e38"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c39",
+          "text": "Probe: GET https://auth.calendly.com/oauth/authorize?client_id=cliff-probe-nonexistent&redirect_uri=https://example.invalid/callback returned HTTP 200 -> https://calendly.com/app/login |  Calendly ",
+          "evidence_ids": [
+            "e39"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "On the **OAuth apps** tab, select **Create OAuth app**.",
+          "fetched_at": "2026-11-04T12:56:53.596Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e2",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "**App name**: use letters, numbers, hyphens, and spaces only.",
+          "fetched_at": "2026-11-04T12:56:53.596Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e3",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Enter exactly one URI.",
+          "fetched_at": "2026-11-04T12:56:53.596Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e4",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "select **Sandbox** for development and testing, or **Production** when your app is ready for real users.",
+          "fetched_at": "2026-11-04T12:56:53.596Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e5",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Select at least one scope.",
+          "fetched_at": "2026-11-04T12:56:53.596Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e6",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "| Production  | `https` URIs only",
+          "fetched_at": "2026-11-04T12:56:53.596Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e7",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "You cannot view the client secret or the webhook signing key again.",
+          "fetched_at": "2026-11-04T12:56:53.596Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e8",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Every OAuth app must use Proof Key for Code Exchange (PKCE) with the `S256` method.",
+          "fetched_at": "2026-11-04T12:56:53.596Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e9",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Change the app name, redirect URI, environment type, or scopes.",
+          "fetched_at": "2026-11-04T12:56:53.596Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e10",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "You cannot undo this action.",
+          "fetched_at": "2026-11-04T12:56:53.596Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e11",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Create an OAuth app to access Calendly data on behalf of other Calendly users.",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e12",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Log in to Calendly, or sign up for a Calendly account.",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e13",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "select **Sandbox** for development and testing, or **Production** when your app is ready for real users.",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e14",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "| Production  | `https` URIs only",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e15",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Enter exactly one URI.",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e16",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Every OAuth app must use Proof Key for Code Exchange (PKCE) with the `S256` method.",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e17",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Select at least one scope.",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e18",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "You cannot view the client secret or the webhook signing key again.",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e19",
+          "url": "https://developer.calendly.com/api-docs/overview/rate-limits",
+          "quote": "| Paid Plans   | 500 requests per user per minute |",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e20",
+          "url": "https://developer.calendly.com/api-docs/overview/rate-limits",
+          "quote": "| Free Plan    | 50 requests per user per minute  |",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e21",
+          "url": "https://developer.calendly.com/api-docs/overview/rate-limits",
+          "quote": "Only 8 OAuth tokens per user can be requested within a span of 1 minute.",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e22",
+          "url": "https://developer.calendly.com/api-docs/overview/rate-limits",
+          "quote": "| Create Event Invitee | Trial                | 5 requests per user per day      |",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e23",
+          "url": "https://developer.calendly.com/api-docs/overview/rate-limits",
+          "quote": "These limits apply to both direct API calls and calls made through third-party integrations.",
+          "fetched_at": "2026-11-04T12:56:55.231Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e24",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Then use the OAuth authorization code flow with PKCE to get an access token for each user.",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e25",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Every OAuth app must use Proof Key for Code Exchange (PKCE) with the `S256` method. If the authorization request does not include a code challenge, the request fails.",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e26",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "https://auth.calendly.com/oauth/authorize?client_id=CLIENT_ID",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e27",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Send a POST request to [Get Access Token](/api-docs/calendly-o-auth/o-auth/post-oauth-refresh-token) at `https://auth.calendly.com/oauth/token`.",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e28",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "`https` URIs, and `http` URIs on `localhost`. Example: `http://localhost:1234/callback`",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e29",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "| Production  | `https` URIs only",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e30",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Enter exactly one URI.",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e31",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "Select at least one scope.",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e32",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "If your app runs on a server, also send your client secret. Use HTTP Basic authentication with your client ID as the username and your client secret as the password.",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e33",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "You cannot view the client secret or the webhook signing key again. At this time, you also cannot view the client ID again in Developer tools.",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e34",
+          "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+          "quote": "We recommend that you start with a Sandbox app for development. Create a second app for Production when you are ready to use real customer data.",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e35",
+          "url": "https://developer.calendly.com/api-docs/overview/rate-limits",
+          "quote": "| Paid Plans   | 500 requests per user per minute |",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e36",
+          "url": "https://developer.calendly.com/api-docs/overview/rate-limits",
+          "quote": "Only 8 OAuth tokens per user can be requested within a span of 1 minute.",
+          "fetched_at": "2026-11-04T12:56:56.252Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e37",
+          "url": "https://developer.calendly.com",
+          "quote": "HTTP 200 -> https://developer.calendly.com/docs/getting-started/overview",
+          "fetched_at": "2026-11-04T12:56:49.092Z",
+          "kind": "console_probe",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e38",
+          "url": "https://calendly.com/.well-known/openid-configuration",
+          "quote": "HTTP 200, discovery document: authorize=https://calendly.com/oauth/authorize, PKCE methods=S256",
+          "fetched_at": "2026-11-04T12:56:49.936Z",
+          "kind": "well_known",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e39",
+          "url": "https://auth.calendly.com/oauth/authorize",
+          "quote": "HTTP 200 -> https://calendly.com/app/login |  Calendly ",
+          "fetched_at": "2026-11-04T12:56:52.029Z",
+          "kind": "console_probe",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        }
+      ],
+      "attempt_log": [
+        {
+          "id": "a_probe_1",
+          "at": "2026-11-04T12:56:49.092Z",
+          "mode": "probe",
+          "action": "GET https://developer.calendly.com",
+          "observed": "HTTP 200 -> https://developer.calendly.com/docs/getting-started/overview",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c37"
+          ]
+        },
+        {
+          "id": "a_probe_2",
+          "at": "2026-11-04T12:56:49.936Z",
+          "mode": "probe",
+          "action": "GET https://calendly.com/.well-known/openid-configuration",
+          "observed": "HTTP 200, discovery document: authorize=https://calendly.com/oauth/authorize, PKCE methods=S256",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c38"
+          ]
+        },
+        {
+          "id": "a_probe_3",
+          "at": "2026-11-04T12:56:52.029Z",
+          "mode": "probe",
+          "action": "GET https://auth.calendly.com/oauth/authorize?client_id=cliff-probe-nonexistent&redirect_uri=https://example.invalid/callback",
+          "observed": "HTTP 200 -> https://calendly.com/app/login |  Calendly ",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c39"
+          ]
+        }
+      ],
+      "corrections": [
+        {
+          "claim_id": "c26",
+          "from": "primary",
+          "to": "unverified",
+          "reason": "conflicts with a better-supported claim: The authorize endpoint URL disagrees: c26 gives https://auth.calendly.com/oauth/authorize, while c38's discovery document gives https://calendly.com/oauth/authorize."
+        }
+      ],
+      "belief_diff": [
+        {
+          "topic": "Does letting arbitrary users connect require provider review or verification?",
+          "prior_belief": "Yes, Calendly requires the app to be submitted for review before arbitrary users outside the developer's own account can connect via OAuth.",
+          "finding": "The claims state any Calendly user can create an OAuth app from Developer tools and that the page describes no review or approval step before the app can access other users' data.",
+          "verdict": "corrected",
+          "claim_ids": [
+            "c11"
+          ]
+        },
+        {
+          "topic": "Typical approval wait time",
+          "prior_belief": "Calendly's app review typically takes about 2 to 4 weeks from submission to a decision.",
+          "finding": "No claim addresses review timing; since the claims describe no review step at all, the wait time cannot be verified.",
+          "verdict": "could_not_verify",
+          "claim_ids": [
+            "c11"
+          ]
+        },
+        {
+          "topic": "Limits while the app is unapproved",
+          "prior_belief": "Unapproved apps are limited to connecting the developer's own Calendly account and accounts they explicitly invite, capped at 5 connected users.",
+          "finding": "The claims do not describe any unapproved-app restriction or a 5-user cap; they only say no review step is described before access to other users' data.",
+          "verdict": "could_not_verify",
+          "claim_ids": [
+            "c11"
+          ]
+        },
+        {
+          "topic": "Fees or paid requirements",
+          "prior_belief": "Creating and using a Calendly OAuth app is free, but connecting users generally requires the connecting accounts to be on a paid Calendly plan such as Standard or higher.",
+          "finding": "Claims say a Calendly account is required to create an app and give rate limits differing by paid versus free plan, but do not state that connecting users must be on a paid plan or that app creation is free.",
+          "verdict": "refined",
+          "claim_ids": [
+            "c12",
+            "c19",
+            "c20",
+            "c35"
+          ]
+        },
+        {
+          "topic": "Key prerequisites (domain, privacy policy, video, business verification)",
+          "prior_belief": "Submission requires a verified company domain, a publicly accessible privacy policy and terms of service, a demo video showing the integration, and a contact email, but no formal business incorporation verification.",
+          "finding": "The claims list no domain, privacy policy, video, or contact email requirements; the only prerequisites stated are having a Calendly account and selecting at least one scope.",
+          "verdict": "could_not_verify",
+          "claim_ids": [
+            "c12",
+            "c5",
+            "c11"
+          ]
+        },
+        {
+          "topic": "Redirect URI rules",
+          "prior_belief": "Redirect URIs must be registered exactly in advance, must use HTTPS, and cannot contain wildcards or unregistered query parameters.",
+          "finding": "Claims confirm one redirect URI per app and that Production allows only https while Sandbox also allows http on localhost; they say nothing about exact pre-registration, wildcards, or query parameters.",
+          "verdict": "refined",
+          "claim_ids": [
+            "c3",
+            "c6",
+            "c14",
+            "c15",
+            "c28",
+            "c29",
+            "c30"
+          ]
+        }
+      ],
+      "sources_searched": [
+        "https://developer.calendly.com/docs/authentication/creating-an-oauth-app",
+        "https://developer.calendly.com/docs/authentication/creating-an-oauth-app.md",
+        "https://developer.calendly.com/api-docs/overview/rate-limits",
+        "https://developer.calendly.com/release-notes/2026/4/15.md",
+        "https://developer.calendly.com/atom.xml",
+        "https://developer.calendly.com/release-notes/2024/1/3",
+        "https://docs.unified.to/skills/calendly-oauth-app/SKILL.md",
+        "https://docs.n8n.io/integrations/builtin/credentials/calendly"
+      ],
+      "uncertain": [
+        "The authorize endpoint is https://auth.calendly.com/oauth/authorize."
+      ]
+    }
+  }
+}

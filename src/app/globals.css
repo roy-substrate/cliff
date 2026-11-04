@@ -1,39 +1,164 @@
 @import "tailwindcss";
 
+/*
+ * Cliff design system. Playful consumer-product warmth, credible developer content.
+ * Display: Baloo 2 (rounded, extra-bold). Annotations: Caveat (hand-drawn). Body + code: Geist.
+ */
 :root {
-  --bg: #fbfaf8;
-  --fg: #1a1916;
-  --muted: #6b675f;
-  --line: #e4e0d8;
-  --panel: #ffffff;
-  --accent: #c2410c; /* the cliff */
-  --accent-soft: #fff1e8;
+  --cream: #fff9f1; /* warm off-white page */
+  --ink: #1d1c21; /* almost-black type and outlines */
+  --muted: #6c6a73;
+  --line: #ece4d8;
+  --navy: #1f2d5c;
+  --sky: #cdeafb;
+  --sky-deep: #4aa8e8;
+  --butter: #ffe48a;
+  --coral: #ff6f4f;
+  --green: #2fbf71;
+  /* pastel surfaces */
+  --sky-soft: #eaf6fe;
+  --mint-soft: #e5f8ec;
+  --butter-soft: #fff5d1;
+  --peach-soft: #ffeadf;
+  --coral-soft: #ffe0d8;
+  --lilac-soft: #efeafe;
 }
 
 @theme inline {
-  --color-bg: var(--bg);
-  --color-fg: var(--fg);
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-line: var(--line);
-  --color-panel: var(--panel);
-  --color-accent: var(--accent);
-  --color-accent-soft: var(--accent-soft);
+  --color-navy: var(--navy);
+  --color-sky: var(--sky);
+  --color-sky-deep: var(--sky-deep);
+  --color-butter: var(--butter);
+  --color-coral: var(--coral);
+  --color-green: var(--green);
+  --color-sky-soft: var(--sky-soft);
+  --color-mint-soft: var(--mint-soft);
+  --color-butter-soft: var(--butter-soft);
+  --color-peach-soft: var(--peach-soft);
+  --color-coral-soft: var(--coral-soft);
+  --color-lilac-soft: var(--lilac-soft);
+  /* legacy names kept for any component not yet restyled */
+  --color-fg: var(--ink);
+  --color-bg: var(--cream);
+  --color-panel: #ffffff;
+  --color-accent: var(--coral);
+  --color-accent-soft: var(--coral-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-baloo);
+  --font-hand: var(--font-caveat);
 }
 
+html {
+  scroll-behavior: smooth;
+}
 body {
-  background: var(--bg);
-  color: var(--fg);
+  background: var(--cream);
+  color: var(--ink);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: 15.5px;
+  line-height: 1.6;
 }
 
-/* markdown-ish step bodies */
+.font-display {
+  font-family: var(--font-baloo), system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+.font-hand {
+  font-family: var(--font-caveat), cursive;
+}
+
+/* soft, warm shadows (never grey-blue corporate) */
+.shadow-soft {
+  box-shadow: 0 1px 0 rgba(29, 28, 33, 0.04), 0 10px 30px -12px rgba(89, 64, 34, 0.18);
+}
+.shadow-float {
+  box-shadow: 0 18px 40px -16px rgba(31, 45, 92, 0.28);
+}
+
+/* sky-to-cream hero wash, like the reference splash */
+.bg-sky-wash {
+  background: radial-gradient(1200px 500px at 70% -10%, #bfe4fb 0%, rgba(191, 228, 251, 0) 60%),
+    linear-gradient(180deg, #d8effd 0%, #eef8fe 45%, var(--cream) 100%);
+}
+.bg-night {
+  background: radial-gradient(800px 300px at 20% 0%, #33508f 0%, rgba(51, 80, 143, 0) 60%), linear-gradient(180deg, #1f2d5c 0%, #273a73 100%);
+}
+
+/* pill buttons */
+.btn-ink {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 font-display text-lg font-bold text-white transition;
+}
+.btn-ink:hover {
+  transform: translateY(-2px) rotate(-0.5deg);
+  box-shadow: 0 10px 22px -10px rgba(29, 28, 33, 0.6);
+}
+.btn-ink:active {
+  transform: translateY(0) scale(0.98);
+}
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-ink/10 bg-white px-5 py-2 font-display font-bold text-ink transition;
+}
+.btn-ghost:hover {
+  border-color: var(--ink);
+  transform: translateY(-1px);
+}
+
+/* motion */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50% { transform: translateY(-10px) rotate(var(--r, 0deg)); }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(8deg); }
+}
+@keyframes pop-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 111, 79, 0.5); }
+  50% { box-shadow: 0 0 0 7px rgba(255, 111, 79, 0); }
+}
+@keyframes dash {
+  to { stroke-dashoffset: -40; }
+}
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-float-slow { animation: float 8s ease-in-out infinite; }
+.animate-bob { animation: bob 2.6s ease-in-out infinite; }
+.animate-wiggle { animation: wiggle 1.2s ease-in-out infinite; transform-origin: 70% 90%; }
+.animate-pop { animation: pop-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.animate-pulse-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
+.pip-eyes { animation: blink 5s infinite; transform-origin: center 52%; transform-box: fill-box; }
+.cable-flow { stroke-dasharray: 6 8; animation: dash 1.2s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float, .animate-float-slow, .animate-bob, .animate-wiggle, .animate-pulse-dot, .pip-eyes, .cable-flow { animation: none; }
+}
+
+/* step bodies coming from guide markdown */
 .prose-step p { margin: 0.35rem 0; }
 .prose-step ul { list-style: disc; padding-left: 1.2rem; margin: 0.35rem 0; }
-.prose-step code { font-family: var(--font-geist-mono), monospace; font-size: 0.85em; background: #f1eee8; padding: 0 0.25rem; border-radius: 3px; }
+.prose-step code, code.tech {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.86em;
+  background: #f5efe5;
+  padding: 0.05rem 0.35rem;
+  border-radius: 6px;
+}
 
 details > summary { cursor: pointer; list-style: none; }
 details > summary::-webkit-details-marker { display: none; }
