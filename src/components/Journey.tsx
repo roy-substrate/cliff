@@ -5,6 +5,7 @@ import type { Guide } from "@/lib/schema";
 import { STAGE_TONES } from "@/lib/present";
 import { ClaimChips, type ClaimBundle } from "./ClaimChips";
 import { Pip } from "./brand/Mascot";
+import { Md } from "./Md";
 
 type Step = Guide["steps"][number];
 type Attempt = Guide["provenance"]["attempt_log"][number];
@@ -52,7 +53,7 @@ export function Journey({ steps, bundles, attempts }: { steps: Step[]; bundles: 
                 </button>
                 {isOpen && (
                   <div className="animate-pop border-t border-ink/5 px-5 pb-5 pt-3">
-                    <div className="prose-step whitespace-pre-wrap text-[15px] text-ink/85">{s.detail_md}</div>
+                    <Md text={s.detail_md} className="text-[15px] text-ink/85" />
                     <div className="mt-2 text-xs text-muted">
                       Sources for this step:
                       <ClaimChips bundles={s.claim_ids.map((id) => bundles[id]).filter(Boolean)} />

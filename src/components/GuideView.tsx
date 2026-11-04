@@ -82,8 +82,8 @@ export function GuideView({ guide, versionId, createdAt, latest }: { guide: Guid
           </div>
           <div className="rounded-[26px] bg-white p-4 shadow-soft">
             <div className="text-xs font-bold uppercase tracking-wide text-muted">Approval wait</div>
-            <div className="font-display mt-1 text-2xl font-extrabold leading-tight">{fallback ? "Unknown" : approvalText(guide.time)}</div>
-            <div className="text-xs text-muted">{guide.time.unapproved_usable ? "You can start before approval, with limits" : "Not usable before approval"}</div>
+            <div className="font-display mt-1 text-2xl font-extrabold leading-tight">{fallback ? "Unknown" : !guide.has_oauth ? "None" : approvalText(guide.time)}</div>
+            <div className="text-xs text-muted">{!guide.has_oauth && !fallback ? "No OAuth app, so nothing to approve" : guide.time.unapproved_usable ? "You can start before approval, with limits" : "Not usable before approval"}</div>
             {!fallback && guide.time.claim_ids.length > 0 && <div className="mt-1 text-xs text-muted">sources {chips(guide.time.claim_ids)}</div>}
           </div>
         </div>
@@ -100,6 +100,9 @@ export function GuideView({ guide, versionId, createdAt, latest }: { guide: Guid
           <span className="ml-auto flex flex-wrap items-center gap-2">
             <ReverifyButton versionId={versionId} />
             <CopyLink path={`/guides/${versionId}`} />
+            <Link href={`/generate?q=${encodeURIComponent(guide.app.slug)}&force=1`} className="btn-ghost !py-1.5 !text-sm" title="Runs the full live investigation again (about $0.50)">
+              ▶ Watch Pip investigate it live
+            </Link>
           </span>
           <span className="w-full text-xs text-muted">
             Version from {createdAt.slice(0, 10)} ·{" "}
@@ -139,7 +142,7 @@ export function GuideView({ guide, versionId, createdAt, latest }: { guide: Guid
           ["#who", "Who does what"],
           ["#paperwork", "Paperwork"],
           ["#stuck", "If you get stuck"],
-          ["#reference", "Technical reference"],
+          ...(guide.has_oauth ? [["#reference", "Technical reference"]] : []),
           ["#evidence", "How we know"],
         ].map(([h, t]) => (
           <a key={h} href={h} className="rounded-full bg-white px-3.5 py-1.5 shadow-soft transition hover:-translate-y-0.5">
@@ -153,7 +156,7 @@ export function GuideView({ guide, versionId, createdAt, latest }: { guide: Guid
           <p className="font-display text-xl font-bold leading-snug sm:text-2xl">{bob.verdict}</p>
           <div className="mt-4 flex flex-wrap gap-2 text-sm">
             <span className={`rounded-full px-3 py-1.5 font-semibold ${bob.composio_managed ? "bg-green text-white" : bob.composio_managed === false ? "bg-butter-soft" : "bg-cream"}`}>
-              Composio managed auth: {bob.composio_managed === null ? "not checked" : bob.composio_managed ? "available, zero setup" : "no, bring your own app"}
+              Composio managed auth: {bob.composio_managed === null ? (guide.composio ? "not in Composio's managed-OAuth directory" : "not checked") : bob.composio_managed ? "available, zero setup" : "no, bring your own app"}
             </span>
             <span className="rounded-full bg-cream px-3 py-1.5 font-semibold">Agent access allowed: {bob.agent_access_allowed}</span>
           </div>
@@ -294,6 +297,7 @@ export function GuideView({ guide, versionId, createdAt, latest }: { guide: Guid
         )}
       </Panel>
 
+      {guide.has_oauth && (
       <Panel id="reference" title="Technical reference" kicker="The exact values, for when you're in the console.">
         <dl className="grid gap-2 text-sm sm:grid-cols-2">
           {[
@@ -335,6 +339,7 @@ export function GuideView({ guide, versionId, createdAt, latest }: { guide: Guid
           </div>
         )}
       </Panel>
+      )}
 
       <Panel id="evidence" tone="bg-white" title="How we know" kicker="What the model believed before researching, what the sources actually said, and everything we corrected or couldn't confirm.">
         {guide.provenance.belief_diff.length === 0 ? (

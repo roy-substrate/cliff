@@ -20,7 +20,9 @@ export function CliffCalculator({ guide, bundles }: { guide: Guide; bundles: Rec
   const [scopes, setScopes] = useState<string[]>(tiers.slice(0, 1).map((t) => t.scope));
   const [users, setUsers] = useState<UserBucket>("hundreds");
 
-  const r = useMemo(() => computeCliff(guide, { distribution, scopes, users }), [guide, distribution, scopes, users]);
+  const r0 = useMemo(() => computeCliff(guide, { distribution, scopes, users }), [guide, distribution, scopes, users]);
+  // an API-key-only service has no review to trip, whatever the path nodes say
+  const r = guide.has_oauth ? r0 : { ...r0, tripped: false, gates: [], unknownWait: false };
   const toggle = (s: string) => setScopes((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s]));
   const scale = Math.max(r.totalMax, 1);
 
@@ -82,7 +84,7 @@ export function CliffCalculator({ guide, bundles }: { guide: Guide; bundles: Rec
           <span className="absolute -right-1 -top-1">
             <Pip mood={r.tripped ? "oops" : "celebrate"} size={78} />
           </span>
-          <div className="font-hand text-2xl text-ink/70">{r.tripped ? "uh oh, that's over the cliff" : "no cliff here, nice"}</div>
+          <div className="font-hand text-2xl text-ink/70">{!guide.has_oauth ? "no OAuth, so no review cliff" : r.tripped ? "uh oh, that's over the cliff" : "no cliff here, nice"}</div>
           {(() => {
             // headline the first sentence; keep the rest readable body text
             const i = r.verdict.search(/[.!?]\s/);
