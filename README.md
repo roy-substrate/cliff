@@ -62,7 +62,7 @@ pnpm typecheck
 - Live runs do not log in to provider consoles. Console-level evidence for library apps is recorded by hand or with a browser agent beforehand and attached as `tested` evidence.
 - Many provider pages are rendered by JavaScript. Probes cannot always see login walls or error text, and say so.
 - Wait times are ranges drawn from docs and developer reports, not promises.
-- On Vercel the filesystem is read-only, so live-generated guides are stored in temporary storage and may disappear. Library guides are committed in `data/guides`. Swap `src/lib/store.ts` for a database to persist live guides.
+- Library guides ship with the deployment from `data/guides`. Live-generated guides are stored in a private Vercel Blob store, because a serverless function's disk is per-instance and temporary (the first deploy wrote live guides to disk and their share links 404ed on the next request).
 - The in-memory rate limiter resets on each serverless instance. Set the Upstash variables for a shared limit.
 - Drafted documents are templates, not legal advice.
 
