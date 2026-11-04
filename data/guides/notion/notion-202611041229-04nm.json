@@ -1,0 +1,1769 @@
+{
+  "versionId": "notion-202611041229-04nm",
+  "slug": "notion",
+  "created_at": "2026-11-04T12:29:42.103Z",
+  "created_by": "library",
+  "cost_usd": 0,
+  "guide": {
+    "app": {
+      "name": "Notion",
+      "slug": "notion",
+      "homepage": "https://www.notion.so",
+      "developer_portal": "https://app.notion.com/developers/connections"
+    },
+    "summary": "Notion uses a standard OAuth 2.0 authorization code flow through a public connection you create in the Developer portal. No review is needed to start authorizing users. A security review applies only if you want a Marketplace listing, which is optional. The main traps are an installation scope setting that cannot be changed after creation, refresh token rotation, and per-user authorization where users only see pages they have full access to.",
+    "has_oauth": true,
+    "auth_alternatives": [],
+    "build_or_borrow": {
+      "composio_managed": true,
+      "composio_slug": "notion",
+      "reasons_to_bring_own": [
+        "You want your own Marketplace listing. That requires Any workspace installation scope and a Notion security review.",
+        "You want to limit installs to a specific set of workspaces, which is fixed when the connection is created."
+      ],
+      "agent_access_allowed": "unknown",
+      "verdict": "Use Composio managed auth; you do not need your own app yet because Notion requires no review to start OAuth, so your own connection only matters once you want your own Marketplace listing or workspace restrictions."
+    },
+    "time": {
+      "hands_on_minutes": 55,
+      "approval_required": false,
+      "approval_wait_days_min": null,
+      "approval_wait_days_max": null,
+      "unapproved_usable": true,
+      "claim_ids": [
+        "c8",
+        "c32",
+        "c26",
+        "c27",
+        "c28",
+        "c30"
+      ]
+    },
+    "prerequisites": [
+      {
+        "text": "A Notion account and a development workspace to name in the registration form.",
+        "claim_ids": [
+          "c28"
+        ]
+      },
+      {
+        "text": "At least one redirect URI ready to enter in the OAuth configuration section. Public connection OAuth will not work without one.",
+        "claim_ids": [
+          "c12",
+          "c19",
+          "c35"
+        ]
+      },
+      {
+        "text": "A decision on installation scope (Any workspace or Selected workspaces only) before you create the connection.",
+        "claim_ids": [
+          "c9",
+          "c29"
+        ]
+      },
+      {
+        "text": "Workspace owner role is required only if you create an internal connection instead of a public one.",
+        "claim_ids": [
+          "c17",
+          "c33"
+        ]
+      }
+    ],
+    "oauth": {
+      "flow": "authorization_code",
+      "authorize_url": "https://api.notion.com/v1/oauth/authorize",
+      "token_url": "https://api.notion.com/v1/oauth/token",
+      "pkce": "unknown",
+      "refresh_tokens": "yes",
+      "token_lifetime": null,
+      "redirect_uri_rules": [
+        "Redirect URIs are configured in the Developer portal's OAuth configuration section when you create the connection.",
+        "Send redirect_uri in the token request if it was in the authorization URL or if multiple redirect URIs are configured. Otherwise it is not allowed.",
+        "If the user cancels, Notion redirects to your redirect URI with error=access_denied."
+      ],
+      "claim_ids": [
+        "c1",
+        "c2",
+        "c3",
+        "c4",
+        "c5",
+        "c6",
+        "c7",
+        "c11",
+        "c12",
+        "c20",
+        "c38"
+      ]
+    },
+    "blockers": [
+      {
+        "text": "Installation scope (Any workspace or Selected workspaces only) cannot be changed after the connection is created. Only Any workspace makes you eligible for Marketplace listing.",
+        "workaround": "Decide before creating the connection. If unsure, choose Any workspace, since listing stays optional. If you choose wrong, create a new connection.",
+        "severity": "med",
+        "claim_ids": [
+          "c9",
+          "c29",
+          "c31"
+        ]
+      },
+      {
+        "text": "A 429 with public_api_request_blocked means Notion restricted the connection's API access. Retrying will not help.",
+        "workaround": "Stop retrying and contact Notion support.",
+        "severity": "med",
+        "claim_ids": [
+          "c23"
+        ]
+      },
+      {
+        "text": "Each user in a workspace must authorize the connection individually. One admin install does not cover the team.",
+        "workaround": "Design onboarding so every user runs the OAuth flow themselves.",
+        "severity": "low",
+        "claim_ids": [
+          "c10",
+          "c37"
+        ]
+      }
+    ],
+    "app_specific_gotchas": [
+      {
+        "text": "Installation scope is locked at creation and decides whether you can ever list on the Marketplace.",
+        "claim_ids": [
+          "c9",
+          "c29",
+          "c31"
+        ]
+      },
+      {
+        "text": "Refresh rotates tokens. Every refresh returns a new refresh token, so you must store it or lose access.",
+        "claim_ids": [
+          "c7",
+          "c2"
+        ]
+      },
+      {
+        "text": "The authorization URL must always include owner=user, and token requests use HTTP Basic Auth with client ID and secret, not body parameters.",
+        "claim_ids": [
+          "c4",
+          "c5",
+          "c38"
+        ]
+      },
+      {
+        "text": "The page picker only shows pages the user has full access to, so your agent may see less than the user expects.",
+        "claim_ids": [
+          "c37"
+        ]
+      },
+      {
+        "text": "There is no OIDC or OAuth discovery document on notion.so. Hardcode the endpoints.",
+        "claim_ids": [
+          "c40",
+          "c41"
+        ]
+      }
+    ],
+    "agent_vs_human": {
+      "agent_can": [
+        "List the redirect URIs needed for each environment",
+        "Lay out the trade-off between Any workspace and Selected workspaces installation scope",
+        "Write the authorization URL builder with response_type=code and owner=user",
+        "Write the token exchange and refresh code using HTTP Basic Auth, including storage of rotated refresh tokens",
+        "Handle access_denied redirects and public_api_request_blocked errors in code"
+      ],
+      "human_must": [
+        "Log in to the Notion Developer portal and create the public connection under Build > Connections",
+        "Choose the installation scope, which is irreversible",
+        "Copy the client ID and secret from the Configuration tab into a secret store",
+        "Decide whether to pursue a Marketplace listing and its security review",
+        "Contact Notion support if API access is blocked"
+      ]
+    },
+    "artifacts": [
+      {
+        "kind": "redirect_uri_list",
+        "label": "Redirect URIs for the OAuth configuration section"
+      }
+    ],
+    "cliff": {
+      "scope_tiers": [
+        {
+          "scope": "Capabilities (chosen in the registration form)",
+          "purpose": "Decide what the connection can do once a user installs it",
+          "action_label": "Pick connection capabilities",
+          "tier": "unknown",
+          "gate": "The registration form requires capabilities, but the claims do not name individual capabilities or say any of them trigger review.",
+          "cheaper_alternative": null,
+          "claim_ids": [
+            "c28"
+          ]
+        },
+        {
+          "scope": "Page access via page picker (owner=user)",
+          "purpose": "Read or write the pages a user shares during authorization",
+          "action_label": "Access pages the user picks",
+          "tier": "none",
+          "gate": "No review is needed to start OAuth. Each user must authorize individually, and the picker only shows pages that user has full access to.",
+          "cheaper_alternative": null,
+          "claim_ids": [
+            "c4",
+            "c8",
+            "c10",
+            "c37"
+          ]
+        },
+        {
+          "scope": "Installation scope: Selected workspaces only",
+          "purpose": "Limit installs to a specific set of workspaces chosen at creation",
+          "action_label": "Install only in chosen workspaces",
+          "tier": "none",
+          "gate": "Fixed at creation and cannot be changed. The claims tie Marketplace eligibility to Any workspace, so this choice gives up the listing route.",
+          "cheaper_alternative": null,
+          "claim_ids": [
+            "c9",
+            "c13",
+            "c29",
+            "c31"
+          ]
+        },
+        {
+          "scope": "Installation scope: Any workspace",
+          "purpose": "Let any Notion workspace install the connection",
+          "action_label": "Install in any workspace",
+          "tier": "none",
+          "gate": "No review is needed to use it unlisted. It is required for Marketplace eligibility, and a Marketplace listing needs a security review. Cannot be changed after creation.",
+          "cheaper_alternative": null,
+          "claim_ids": [
+            "c8",
+            "c29",
+            "c31",
+            "c32"
+          ]
+        }
+      ],
+      "paths": [
+        {
+          "distribution": "internal",
+          "verdict": "Fast if you are a workspace owner. Creating an internal connection requires the workspace owner role. The claims do not describe how internal connections authenticate, so check the docs before building agent auth on this path. It does not fit an agent whose users connect their own workspaces.",
+          "total_days_min": 0,
+          "total_days_max": 0,
+          "nodes": [
+            {
+              "id": "i1",
+              "title": "Confirm you hold the workspace owner role",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c17",
+                "c33"
+              ]
+            },
+            {
+              "id": "i2",
+              "title": "Log in to the Developer portal and create the internal connection",
+              "actor": "developer",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i1"
+              ],
+              "claim_ids": [
+                "c17",
+                "c27",
+                "c33",
+                "c39"
+              ]
+            }
+          ]
+        },
+        {
+          "distribution": "unlisted_public",
+          "verdict": "The right default for an agent. You create a public connection and run OAuth immediately with no review. The one hard decision is installation scope, which cannot be changed later. Choose Any workspace if you might ever want a Marketplace listing.",
+          "total_days_min": 0,
+          "total_days_max": 0,
+          "nodes": [
+            {
+              "id": "u1",
+              "title": "Decide installation scope (Any workspace vs Selected workspaces). This is irreversible; the agent can lay out the trade-off only.",
+              "actor": "developer",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c9",
+                "c13",
+                "c29",
+                "c31"
+              ]
+            },
+            {
+              "id": "u2",
+              "title": "List the redirect URI(s) for each environment",
+              "actor": "agent",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c6",
+                "c12",
+                "c19"
+              ]
+            },
+            {
+              "id": "u3",
+              "title": "Log in to the Developer portal, go to Build > Connections > Create new connection, and fill in name, development workspace, redirect URIs, installation scope and capabilities",
+              "actor": "developer",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u1",
+                "u2"
+              ],
+              "claim_ids": [
+                "c26",
+                "c27",
+                "c28",
+                "c35",
+                "c39"
+              ]
+            },
+            {
+              "id": "u4",
+              "title": "Copy the client ID and client secret from the Configuration tab into your secret store",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u3"
+              ],
+              "claim_ids": [
+                "c30"
+              ]
+            },
+            {
+              "id": "u5",
+              "title": "Write the auth code flow: authorize URL with response_type=code and owner=user, Basic-auth token exchange, refresh with token rotation, access_denied handling",
+              "actor": "agent",
+              "est_minutes": 90,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u2"
+              ],
+              "claim_ids": [
+                "c1",
+                "c2",
+                "c3",
+                "c4",
+                "c5",
+                "c6",
+                "c7",
+                "c11",
+                "c20",
+                "c38"
+              ]
+            },
+            {
+              "id": "u6",
+              "title": "Authorize with a real Notion account and confirm the page picker and token exchange work",
+              "actor": "developer",
+              "est_minutes": 20,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u4",
+                "u5"
+              ],
+              "claim_ids": [
+                "c10",
+                "c37",
+                "c42"
+              ]
+            }
+          ]
+        },
+        {
+          "distribution": "marketplace",
+          "verdict": "Optional, and only if installation scope is Any workspace. It requires a Notion security review whose duration is not documented. Ship unlisted first and treat listing as a separate later step.",
+          "total_days_min": 0,
+          "total_days_max": 0,
+          "nodes": [
+            {
+              "id": "m1",
+              "title": "Complete the unlisted public connection with installation scope set to Any workspace",
+              "actor": "developer",
+              "est_minutes": 60,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c29",
+                "c31",
+                "c8"
+              ]
+            },
+            {
+              "id": "m2",
+              "title": "Draft listing details for the Listings section",
+              "actor": "agent",
+              "est_minutes": 45,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c16"
+              ]
+            },
+            {
+              "id": "m3",
+              "title": "Optionally set a template URL in Configuration > Basic information distribution settings",
+              "actor": "developer",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "m1"
+              ],
+              "claim_ids": [
+                "c36"
+              ]
+            },
+            {
+              "id": "m4",
+              "title": "Enter the listing details and submit for security review",
+              "actor": "developer",
+              "est_minutes": 30,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "m1",
+                "m2"
+              ],
+              "claim_ids": [
+                "c16",
+                "c32"
+              ]
+            },
+            {
+              "id": "m5",
+              "title": "Notion security review (duration not documented)",
+              "actor": "provider_wait",
+              "est_minutes": 0,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": true,
+              "depends_on": [
+                "m4"
+              ],
+              "claim_ids": [
+                "c32"
+              ]
+            }
+          ]
+        }
+      ],
+      "unapproved_mode": {
+        "limits": [
+          "Full OAuth works without Marketplace submission or review. An unlisted public connection is usable as-is.",
+          "Each user in a workspace must authorize individually. One install does not cover the whole workspace.",
+          "Users can only share pages they have full access to in the page picker.",
+          "With Selected workspaces scope, only the workspaces chosen at creation can install, and this cannot be changed.",
+          "If Notion restricts API access (429 public_api_request_blocked), retries will not help and you must contact support."
+        ],
+        "breaks_at": "Nothing breaks for unlisted use. The wall is a Marketplace listing, which requires a Notion security review of undocumented length. If you chose Selected workspaces at creation, that route is closed and you would need a new connection.",
+        "claim_ids": [
+          "c8",
+          "c10",
+          "c13",
+          "c23",
+          "c29",
+          "c31",
+          "c32",
+          "c37"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "n": 1,
+        "title": "Prepare the registration inputs",
+        "detail_md": "Draft what the portal form will ask for: a connection name, the development workspace, redirect URI(s), installation scope and capabilities (c28). List every callback URL you will use (local dev, staging, production), because redirect URIs are configured in the OAuth configuration section and public OAuth needs at least one (c12, c19). Keep the list short: with **more than one** redirect URI configured, every token request must include `redirect_uri` (c6).",
+        "actor": "agent",
+        "claim_ids": [
+          "c28",
+          "c12",
+          "c19",
+          "c6"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 2,
+        "title": "Decide installation scope (irreversible)",
+        "detail_md": "Choose **Any workspace** or **Selected workspaces only**. This cannot be changed after creation (c9, c29). Selected workspaces locks the connection to a set you choose now (c13). Any workspace lets any workspace install it and is the only path to an optional Marketplace listing (c13, c31). For an agent that arbitrary users will connect, Any workspace is the practical choice. The agent can lay out this trade-off, but only you should make the call.",
+        "actor": "developer",
+        "claim_ids": [
+          "c9",
+          "c29",
+          "c13",
+          "c31"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      },
+      {
+        "n": 3,
+        "title": "Create the public connection in the Developer portal",
+        "detail_md": "Log in to the Notion Developer portal (the connections page responded at `https://app.notion.com/developers/connections`, c39). Go to **Build > Connections** and click **Create new connection** (c26, c27). Fill in:\n\n- name\n- development workspace\n- redirect URI(s) in the OAuth configuration section\n- installation scope\n- capabilities\n\n(c28, c35)\n\nWorkspace owner rights are documented as required only for *internal* connections (c17, c33). The claims do not say what role a public connection needs.",
+        "actor": "developer",
+        "claim_ids": [
+          "c26",
+          "c27",
+          "c28",
+          "c35",
+          "c39",
+          "c17",
+          "c33"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 15
+      },
+      {
+        "n": 4,
+        "title": "Copy client ID and secret; optionally set a template URL",
+        "detail_md": "After creation, open the **Configuration** tab and copy the OAuth client ID and client secret (c30). Store the secret in your secrets manager, not in code. If you want a duplicate-on-install template, set the optional template URL in **Basic information** under the distribution settings on the same tab (c36).",
+        "actor": "developer",
+        "claim_ids": [
+          "c30",
+          "c36"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      },
+      {
+        "n": 5,
+        "title": "Implement the authorization redirect",
+        "detail_md": "Build the authorize URL on `https://api.notion.com/v1/oauth/authorize` (c1). Use the authorization code flow with `response_type=code` and always set `owner=user` (c3, c4). A probe with a fake client_id was redirected to Notion's install-integration page, which confirms the endpoint is live (c42).\n\nNotion serves no OIDC or OAuth discovery document on notion.so, so hardcode the endpoints (c40, c41).\n\nHandle cancellation: Notion redirects back with `error=access_denied` (c11).",
+        "actor": "agent",
+        "claim_ids": [
+          "c1",
+          "c3",
+          "c4",
+          "c42",
+          "c40",
+          "c41",
+          "c11"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 45
+      },
+      {
+        "n": 6,
+        "title": "Implement code exchange and refresh with rotation",
+        "detail_md": "Exchange the code at `https://api.notion.com/v1/oauth/token`, authenticating with HTTP Basic using the client ID and secret (c2, c5, c38). The response contains both an access_token and a refresh_token (c20).\n\nInclude `redirect_uri` only if it was in the authorize URL or if you configured multiple redirect URIs. Otherwise it is not allowed (c6).\n\nRefresh against the same endpoint. Each refresh returns a **new** refresh token, so persist it atomically and discard the old one (c2, c7).",
+        "actor": "agent",
+        "claim_ids": [
+          "c2",
+          "c5",
+          "c38",
+          "c20",
+          "c6",
+          "c7"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 60
+      },
+      {
+        "n": 7,
+        "title": "Handle per-user auth and hard blocks",
+        "detail_md": "Model tokens per user, not per workspace. Each user must authorize individually (c10, c37). The page picker only shows pages the user has full access to, so surface a clear message when expected pages are missing (c37).\n\nTreat a 429 with `public_api_request_blocked` as fatal: do not retry. Alert someone to contact Notion support (c23).",
+        "actor": "agent",
+        "claim_ids": [
+          "c10",
+          "c37",
+          "c23"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 30
+      },
+      {
+        "n": 8,
+        "title": "Test end to end with real accounts",
+        "detail_md": "Log in with a real Notion account, run the full flow, pick pages and confirm API calls work. Also run the token refresh path and a cancel (access_denied). No Marketplace submission or review is needed to start OAuth authorization (c8). The connection is usable and shareable with users in its installation scope at this point (c13, c32).",
+        "actor": "developer",
+        "claim_ids": [
+          "c8",
+          "c13",
+          "c32",
+          "c11"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 30
+      },
+      {
+        "n": 9,
+        "title": "Optional: submit a Marketplace listing",
+        "detail_md": "Skip this unless you want discoverability. Listing is separate from OAuth distribution and is managed in the **Listings** section (c16). It requires an Any workspace connection and a Notion security review (c31, c32). The agent can draft listing copy, but submitting it is your job.",
+        "actor": "developer",
+        "claim_ids": [
+          "c16",
+          "c31",
+          "c32"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 30
+      },
+      {
+        "n": 10,
+        "title": "Optional: wait for Notion security review",
+        "detail_md": "Notion runs a security review before a Marketplace listing goes live (c32). How long it takes is **not documented** in the available claims. The 0 in the estimate means unknown, not instant. Your OAuth integration keeps working during the review (c32).",
+        "actor": "provider_wait",
+        "claim_ids": [
+          "c32"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 0
+      }
+    ],
+    "status": "full",
+    "difficulty": {
+      "drivers": [
+        "Irreversible installation scope choice",
+        "Refresh token rotation",
+        "Per-user authorization"
+      ],
+      "score": 2,
+      "level": "instant"
+    },
+    "composio": {
+      "toolkit_slug": "notion",
+      "tool_count": null,
+      "managed_auth": true,
+      "auth_config_fields": [],
+      "redirect_uri": null
+    },
+    "provenance": {
+      "claims": [
+        {
+          "id": "c1",
+          "text": "Notion's OAuth authorization endpoint is https://api.notion.com/v1/oauth/authorize.",
+          "evidence_ids": [
+            "e1"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c2",
+          "text": "The token endpoint is https://api.notion.com/v1/oauth/token, used for both code exchange and refresh.",
+          "evidence_ids": [
+            "e2"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c3",
+          "text": "Notion OAuth integrations use the OAuth 2.0 authorization code flow with response_type=code.",
+          "evidence_ids": [
+            "e3"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c4",
+          "text": "The owner parameter must always be 'user' in the authorization URL.",
+          "evidence_ids": [
+            "e4"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c5",
+          "text": "Token requests are authenticated with HTTP Basic Auth using client ID and secret.",
+          "evidence_ids": [
+            "e5"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c6",
+          "text": "redirect_uri is required in the token request if it was in the authorization URL or if multiple redirect URIs are configured; otherwise not allowed.",
+          "evidence_ids": [
+            "e6"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c7",
+          "text": "Refreshing issues both a new access token and a new refresh token (refresh token rotation).",
+          "evidence_ids": [
+            "e7"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c8",
+          "text": "Marketplace submission or review is not required to start OAuth authorization.",
+          "evidence_ids": [
+            "e8"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c9",
+          "text": "Installation scope (any workspace or selected workspaces) is chosen at creation and can't be changed.",
+          "evidence_ids": [
+            "e9"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c10",
+          "text": "Each user in a workspace must individually authorize an OAuth integration.",
+          "evidence_ids": [
+            "e10"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c11",
+          "text": "If the user cancels, Notion redirects to the redirect URI with an error query param (access_denied).",
+          "evidence_ids": [
+            "e11"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "blocker",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c12",
+          "text": "Redirect URIs are configured in the Developer portal's OAuth configuration section when creating the integration.",
+          "evidence_ids": [
+            "e12"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c13",
+          "text": "Public connections can be installed in any workspace within their installation scope, either any workspace or a specific set chosen at creation.",
+          "evidence_ids": [
+            "e13"
+          ],
+          "status": "primary",
+          "confidence": 0.7,
+          "topic": "scope",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c14",
+          "text": "Installation scope (Any workspace vs Selected workspaces only) is set at creation and cannot be changed afterward.",
+          "evidence_ids": [
+            "e14"
+          ],
+          "status": "inferred",
+          "confidence": 0.4,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c15",
+          "text": "The OAuth Authorization URL only appears in the Developer portal after the public connection is submitted for review.",
+          "evidence_ids": [
+            "e15"
+          ],
+          "status": "inferred",
+          "confidence": 0.4,
+          "topic": "review",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c16",
+          "text": "Marketplace listing details are managed separately from the connection, in the Listings section. Listing is a separate step from OAuth distribution.",
+          "evidence_ids": [
+            "e16"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c17",
+          "text": "Creating an internal connection requires workspace owner rights.",
+          "evidence_ids": [
+            "e17"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c18",
+          "text": "Each user of a public connection must individually complete the auth flow.",
+          "evidence_ids": [
+            "e18"
+          ],
+          "status": "inferred",
+          "confidence": 0.4,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c19",
+          "text": "Public connection OAuth requires a redirect URI to be set in the Developer portal's OAuth configuration.",
+          "evidence_ids": [
+            "e19"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c20",
+          "text": "Notion's token endpoint is https://api.notion.com/v1/oauth/token, and it returns both an access_token and a refresh_token.",
+          "evidence_ids": [
+            "e20"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c21",
+          "text": "Per-connection rate limit is 600 requests per minute for Business and Enterprise plans.",
+          "evidence_ids": [
+            "e21"
+          ],
+          "status": "unverified",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c22",
+          "text": "Per-connection rate limit is 180 requests per minute on all other plans.",
+          "evidence_ids": [
+            "e22"
+          ],
+          "status": "unverified",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c23",
+          "text": "A 429 with public_api_request_blocked means the connection's API access was restricted and retrying won't help. Notion tells you to contact support.",
+          "evidence_ids": [
+            "e23"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c24",
+          "text": "Rate limits are shared per workspace across all connections, and Retry-After can exceed a minute.",
+          "evidence_ids": [
+            "e24"
+          ],
+          "status": "unverified",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c25",
+          "text": "SCIM provisioning is available only on the Enterprise plan.",
+          "evidence_ids": [
+            "e25"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "cost",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c26",
+          "text": "Developers register an app by creating a new public connection in the Notion Developer portal.",
+          "evidence_ids": [
+            "e26"
+          ],
+          "status": "primary",
+          "confidence": 0.7,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c27",
+          "text": "Within the portal, connections are found under Build > Connections, and you click Create new connection.",
+          "evidence_ids": [
+            "e27"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c28",
+          "text": "The registration form requires a connection name and development workspace, redirect URI(s), installation scope, and capabilities.",
+          "evidence_ids": [
+            "e28"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c29",
+          "text": "Installation scope (Any workspace or Selected workspaces only) is immutable after creation.",
+          "evidence_ids": [
+            "e29"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c30",
+          "text": "The OAuth client ID and client secret are retrieved from the Configuration tab after the connection is created.",
+          "evidence_ids": [
+            "e30"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c31",
+          "text": "Choosing Any workspace as the installation scope makes the integration eligible for Marketplace listing, subject to review, and listing is optional.",
+          "evidence_ids": [
+            "e31"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c32",
+          "text": "A Notion security review is required before Marketplace listing, but a public connection can be created and used without listing it.",
+          "evidence_ids": [
+            "e32"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c33",
+          "text": "Creating an internal connection requires workspace owner role.",
+          "evidence_ids": [
+            "e33"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c34",
+          "text": "The Authorization URL field is populated only after a public connection is submitted for review.",
+          "evidence_ids": [
+            "e34"
+          ],
+          "status": "inferred",
+          "confidence": 0.4,
+          "topic": "blocker",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c35",
+          "text": "Redirect URIs are entered in the OAuth configuration section of the form.",
+          "evidence_ids": [
+            "e35"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c36",
+          "text": "An optional template URL is set in the Configuration tab's Basic information section, in the distribution settings.",
+          "evidence_ids": [
+            "e36"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c37",
+          "text": "Each user in a workspace must individually authorize a public connection. The page picker only shows pages the user has full access to.",
+          "evidence_ids": [
+            "e37"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c38",
+          "text": "The token endpoint is https://api.notion.com/v1/oauth/token, authenticated with HTTP Basic using client ID and secret.",
+          "evidence_ids": [
+            "e38"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c39",
+          "text": "Probe: GET https://app.notion.com/developers/connections returned HTTP 200 -> https://app.notion.com/developers/connections",
+          "evidence_ids": [
+            "e39"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c40",
+          "text": "Probe: GET https://www.notion.so/.well-known/openid-configuration returned HTTP 404: no discovery document on notion.so",
+          "evidence_ids": [
+            "e40"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c41",
+          "text": "Probe: GET https://www.notion.so/.well-known/oauth-authorization-server returned HTTP 404: no discovery document on notion.so",
+          "evidence_ids": [
+            "e41"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c42",
+          "text": "Probe: GET https://api.notion.com/v1/oauth/authorize?client_id=cliff-probe-nonexistent&redirect_uri=https://example.invalid/callback returned HTTP 200 -> https://app.notion.com/install-integration?response_type=code&client_id=cliff-probe-nonexistent&redirect_uri=https%3A%2F |  Notion JavaScript must be enabled in order to use Notion. Please",
+          "evidence_ids": [
+            "e42"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "The URL begins with `https://api.notion.com/v1/oauth/authorize` and has the following parameters:",
+          "fetched_at": "2026-11-04T11:54:19.994Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e2",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "send the `code` as part of a `POST` request to Notion’s token endpoint: [https://api.notion.com/v1/oauth/token](https://api.notion.com/v1/oauth/token).",
+          "fetched_at": "2026-11-04T11:54:19.994Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 0.92,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e3",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "| `response_type` | Always use `code`. | ✅ |",
+          "fetched_at": "2026-11-04T11:54:19.994Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e4",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "| `owner` | Always use `user`. | ✅ |",
+          "fetched_at": "2026-11-04T11:54:19.994Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e5",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "The request is authorized using HTTP Basic Authentication. The credential is a colon-delimited combination of the connection’s `CLIENT_ID` and `CLIENT_SECRET`",
+          "fetched_at": "2026-11-04T11:54:19.994Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e6",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "If there are more than one redirect URIs included in your connection settings, this field is required. Otherwise, it is not allowed.",
+          "fetched_at": "2026-11-04T11:54:19.994Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e7",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "Refreshing an access token will generate a new access token and a new refresh token.",
+          "fetched_at": "2026-11-04T11:54:19.994Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e8",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "You can start authorization as soon as you configure the integration’s client credentials and redirect URI; Marketplace submission or review is not required.",
+          "fetched_at": "2026-11-04T11:54:19.994Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e9",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "either **Any workspace** or **Or select 1 or more workspaces**. This can't be changed after creation.",
+          "fetched_at": "2026-11-04T11:54:19.994Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e10",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "each prospective user needs to individually follow the auth flow for the connection.",
+          "fetched_at": "2026-11-04T11:54:19.995Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e11",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "www.example.com/my-redirect-uri?error=access_denied&state=",
+          "fetched_at": "2026-11-04T11:54:19.995Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e12",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "including your redirect URI(s) under the OAuth configuration section",
+          "fetched_at": "2026-11-04T11:54:19.995Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e13",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "A public connection can be installed in any Notion workspace within its [installation scope]",
+          "fetched_at": "2026-11-04T11:54:20.673Z",
+          "kind": "doc",
+          "quote_found": false,
+          "coverage": 0.67,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e14",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "either **Any workspace** or **Selected workspaces only**. This can't be changed after creation.",
+          "fetched_at": "2026-11-04T11:54:20.673Z",
+          "kind": "doc",
+          "quote_found": false,
+          "coverage": 0.22,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e15",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "The Authorization URL field populates after a public connection is submitted for review",
+          "fetched_at": "2026-11-04T11:54:20.673Z",
+          "kind": "doc",
+          "quote_found": false,
+          "coverage": 0,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e16",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "Marketplace listing details (such as descriptions, categories, and images) are managed separately through the **Listings** section.",
+          "fetched_at": "2026-11-04T11:54:20.674Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e17",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "You are required to be a workspace owner to create a connection.",
+          "fetched_at": "2026-11-04T11:54:20.674Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e18",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "if multiple members in a workspace want to use a public connection, each prospective user needs individually follow the auth flow for the connection.",
+          "fetched_at": "2026-11-04T11:54:20.674Z",
+          "kind": "doc",
+          "quote_found": false,
+          "coverage": 0.42,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e19",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "including your redirect URI(s) under the OAuth configuration section",
+          "fetched_at": "2026-11-04T11:54:20.674Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e20",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "Notion responds to the request with an `access_token`, `refresh_token`, and additional information.",
+          "fetched_at": "2026-11-04T11:54:20.674Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e21",
+          "url": "https://developers.notion.com/reference/request-limits",
+          "quote": "| Business and Enterprise | 600 requests per minute (an average of 10 per second) |",
+          "fetched_at": "2026-11-04T11:54:20.674Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e22",
+          "url": "https://developers.notion.com/reference/request-limits",
+          "quote": "| All other plans | 180 requests per minute (an average of 3 per second) |",
+          "fetched_at": "2026-11-04T11:54:20.674Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e23",
+          "url": "https://developers.notion.com/reference/request-limits",
+          "quote": "This connection's API access has been restricted. Retrying won't help. Contact Notion support.",
+          "fetched_at": "2026-11-04T11:54:20.674Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e24",
+          "url": "https://developers.notion.com/reference/request-limits",
+          "quote": "A separate limit is shared across all of the workspace's connections and scaled to the workspace's plan.",
+          "fetched_at": "2026-11-04T11:54:20.674Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e25",
+          "url": "https://developers.notion.com/page/frequently-asked-questions",
+          "quote": "Yes, the SCIM API is available for workspaces in Notion's Enterprise Plan.",
+          "fetched_at": "2026-11-04T11:54:20.674Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e26",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "Navigate to the [Developer portal](https://app.notion.com/developers/connections) and create a new public connection.",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": false,
+          "coverage": 0.67,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e27",
+          "url": "https://developers.notion.com/guides/connections-and-tokens/public-integrations/overview",
+          "quote": "In the **Build** section of the sidebar, select **Connections**.",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e28",
+          "url": "https://developers.notion.com/guides/connections-and-tokens/public-integrations/overview",
+          "quote": "Connection name and development workspace",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e29",
+          "url": "https://developers.notion.com/guides/connections-and-tokens/public-integrations/overview",
+          "quote": "Installation scope is set once, at creation time, and can't be changed afterward.",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e30",
+          "url": "https://developers.notion.com/guides/connections-and-tokens/public-integrations/overview",
+          "quote": "After creation, visit the **Configuration** tab to retrieve your **OAuth client ID** and **OAuth client secret**.",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e31",
+          "url": "https://developers.notion.com/guides/connections-and-tokens/public-integrations/overview",
+          "quote": "This makes the integration eligible for Marketplace listing, subject to review. Listing is optional.",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e32",
+          "url": "https://developers.notion.com/guides/connections-and-tokens/public-integrations/overview",
+          "quote": "Public connections must undergo a Notion security review before being [listed on the Marketplace]",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e33",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "You are required to be a workspace owner to create a connection.",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e34",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "The Authorization URL field populates after a public connection is submitted for review",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": false,
+          "coverage": 0,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e35",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "including your redirect URI(s) under the OAuth configuration section",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e36",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "add the URL of the Notion page you selected to the **Notion URL for optional template** input.",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e37",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "each prospective user needs to individually follow the auth flow for the connection.",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e38",
+          "url": "https://developers.notion.com/guides/get-started/authorization",
+          "quote": "send the `code` as part of a `POST` request to Notion’s token endpoint: [https://api.notion.com/v1/oauth/token](https://api.notion.com/v1/oauth/token).",
+          "fetched_at": "2026-11-04T11:54:21.414Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 0.92,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e39",
+          "url": "https://app.notion.com/developers/connections",
+          "quote": "HTTP 200 -> https://app.notion.com/developers/connections",
+          "fetched_at": "2026-11-04T11:54:09.907Z",
+          "kind": "console_probe",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e40",
+          "url": "https://www.notion.so/.well-known/openid-configuration",
+          "quote": "HTTP 404: no discovery document on notion.so",
+          "fetched_at": "2026-11-04T11:54:10.686Z",
+          "kind": "well_known",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e41",
+          "url": "https://www.notion.so/.well-known/oauth-authorization-server",
+          "quote": "HTTP 404: no discovery document on notion.so",
+          "fetched_at": "2026-11-04T11:54:11.984Z",
+          "kind": "well_known",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e42",
+          "url": "https://api.notion.com/v1/oauth/authorize",
+          "quote": "HTTP 200 -> https://app.notion.com/install-integration?response_type=code&client_id=cliff-probe-nonexistent&redirect_uri=https%3A%2F |  Notion JavaScript must be enabled in order to use Notion. Please enable JavaScript to continue. ",
+          "fetched_at": "2026-11-04T11:54:13.308Z",
+          "kind": "console_probe",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        }
+      ],
+      "attempt_log": [
+        {
+          "id": "a_probe_1",
+          "at": "2026-11-04T11:54:09.907Z",
+          "mode": "probe",
+          "action": "GET https://app.notion.com/developers/connections",
+          "observed": "HTTP 200 -> https://app.notion.com/developers/connections",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c39"
+          ]
+        },
+        {
+          "id": "a_probe_2",
+          "at": "2026-11-04T11:54:10.686Z",
+          "mode": "probe",
+          "action": "GET https://www.notion.so/.well-known/openid-configuration",
+          "observed": "HTTP 404: no discovery document on notion.so",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c40"
+          ]
+        },
+        {
+          "id": "a_probe_3",
+          "at": "2026-11-04T11:54:11.984Z",
+          "mode": "probe",
+          "action": "GET https://www.notion.so/.well-known/oauth-authorization-server",
+          "observed": "HTTP 404: no discovery document on notion.so",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c41"
+          ]
+        },
+        {
+          "id": "a_probe_4",
+          "at": "2026-11-04T11:54:13.308Z",
+          "mode": "probe",
+          "action": "GET https://api.notion.com/v1/oauth/authorize?client_id=cliff-probe-nonexistent&redirect_uri=https://example.invalid/callback",
+          "observed": "HTTP 200 -> https://app.notion.com/install-integration?response_type=code&client_id=cliff-probe-nonexistent&redirect_uri=https%3A%2F |  Notion JavaScript must be enabled in order to use Notion. Please enable JavaScript to continue. ",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c42"
+          ]
+        }
+      ],
+      "corrections": [
+        {
+          "claim_id": "c21",
+          "from": "primary",
+          "to": "unverified",
+          "reason": "sources disagree and neither is better supported: The per-connection rate limit (600 or 180 requests per minute) conflicts with the claim that rate limits are shared per workspace across all connections."
+        },
+        {
+          "claim_id": "c22",
+          "from": "primary",
+          "to": "unverified",
+          "reason": "sources disagree and neither is better supported: The per-connection rate limit (600 or 180 requests per minute) conflicts with the claim that rate limits are shared per workspace across all connections."
+        },
+        {
+          "claim_id": "c24",
+          "from": "primary",
+          "to": "unverified",
+          "reason": "sources disagree and neither is better supported: The per-connection rate limit (600 or 180 requests per minute) conflicts with the claim that rate limits are shared per workspace across all connections."
+        },
+        {
+          "claim_id": "c14",
+          "from": "primary",
+          "to": "inferred",
+          "reason": "quoted text not found on any page we could re-read (best match 22%)"
+        },
+        {
+          "claim_id": "c15",
+          "from": "primary",
+          "to": "inferred",
+          "reason": "quoted text not found on any page we could re-read (best match 0%)"
+        },
+        {
+          "claim_id": "c18",
+          "from": "primary",
+          "to": "inferred",
+          "reason": "quoted text not found on any page we could re-read (best match 42%)"
+        },
+        {
+          "claim_id": "c34",
+          "from": "primary",
+          "to": "inferred",
+          "reason": "quoted text not found on any page we could re-read (best match 0%)"
+        }
+      ],
+      "belief_diff": [
+        {
+          "topic": "Does letting arbitrary users connect require provider review or verification?",
+          "prior_belief": "Yes, Notion requires a public integration to go through its review process before any user outside the workspace that created it can connect.",
+          "finding": "Claims say marketplace submission or review is not required to start OAuth, and a public connection can be created and used without listing; a security review applies only before Marketplace listing.",
+          "verdict": "corrected",
+          "claim_ids": [
+            "c8",
+            "c32"
+          ]
+        },
+        {
+          "topic": "Typical approval wait time",
+          "prior_belief": "Notion review typically takes about 5 business days, though I'd expect it to run up to 2 weeks in busy periods.",
+          "finding": "The claims do not mention review turnaround times.",
+          "verdict": "could_not_verify",
+          "claim_ids": []
+        },
+        {
+          "topic": "Limits while the app is unapproved",
+          "prior_belief": "While unapproved, a public integration can only be installed in the workspace that owns it, with no more than 1 external workspace allowed for testing.",
+          "finding": "Claims say public connections can be installed in any workspace within their installation scope (any workspace or selected workspaces) and can be used without listing, which contradicts the owner-only restriction; no 1-external-workspace limit is mentioned.",
+          "verdict": "corrected",
+          "claim_ids": [
+            "c13",
+            "c8",
+            "c32"
+          ]
+        },
+        {
+          "topic": "Fees or paid requirements",
+          "prior_belief": "Creating and submitting a Notion integration is free, with no paid plan or fee required.",
+          "finding": "The claims do not address fees for creating an integration; the only cost claim concerns SCIM provisioning being Enterprise-only.",
+          "verdict": "could_not_verify",
+          "claim_ids": [
+            "c25"
+          ]
+        },
+        {
+          "topic": "Key prerequisites (domain, privacy policy, video, business verification)",
+          "prior_belief": "Submission requires a privacy policy URL, a company website, and a demo video, but no formal business verification step.",
+          "finding": "The claims do not mention privacy policy, company website, demo video, or business verification; the registration form is described as requiring only name, development workspace, redirect URIs, installation scope, and capabilities.",
+          "verdict": "could_not_verify",
+          "claim_ids": [
+            "c28"
+          ]
+        },
+        {
+          "topic": "Redirect URI rules",
+          "prior_belief": "Redirect URIs must use HTTPS and exactly match one of the URIs registered in the integration settings, with no wildcards allowed.",
+          "finding": "Claims say redirect URIs are configured in the Developer portal's OAuth configuration and that redirect_uri is conditionally required in the token request, but they do not state HTTPS, exact-match, or wildcard rules.",
+          "verdict": "could_not_verify",
+          "claim_ids": [
+            "c6",
+            "c12",
+            "c19",
+            "c35"
+          ]
+        }
+      ],
+      "sources_searched": [
+        "https://developers.notion.com/guides/get-started/authorization",
+        "https://developers.notion.com/guides/authorization/overview",
+        "https://developers.notion.com/reference/authorization",
+        "https://developers.notion.com/guides/connections-and-tokens/public-integrations/overview",
+        "https://developers.notion.com/guides/connections-and-tokens/overview",
+        "https://developers.notion.com/guides",
+        "https://developers.notion.com/reference/request-limits",
+        "https://developers.notion.com/page/frequently-asked-questions"
+      ],
+      "uncertain": [
+        "Installation scope (Any workspace vs Selected workspaces only) is set at creation and cannot be changed afterward.",
+        "The OAuth Authorization URL only appears in the Developer portal after the public connection is submitted for review.",
+        "Each user of a public connection must individually complete the auth flow.",
+        "Per-connection rate limit is 600 requests per minute for Business and Enterprise plans.",
+        "Per-connection rate limit is 180 requests per minute on all other plans.",
+        "Rate limits are shared per workspace across all connections, and Retry-After can exceed a minute.",
+        "The Authorization URL field is populated only after a public connection is submitted for review."
+      ]
+    }
+  }
+}

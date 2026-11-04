@@ -43,12 +43,24 @@ export async function verifyEvidence(
   const urls = [...new Set([...docEvidence.map((e) => e.url), ...extraUrls])].slice(0, 14);
   const pages = new Map<string, { status: "ok" | "unreachable"; text: string }>();
 
+  // Some sites (Google's docs, for one) serve different versions of the same URL on consecutive requests, so a quote
+  // can be on the page and still miss on one fetch. Re-fetch up to 3 times while quotes are missing and accept a
+  // quote if ANY version contains it. Pages we cannot read at all are never counted as misses.
+  const quotesFor = (u: string) => docEvidence.filter((e) => e.url === u).map((e) => e.quote);
   await Promise.all(
     urls.map(async (u) => {
-      const r = await fetchText(u, 9000);
-      // JS-only shells and bot walls come back "ok" but near-empty: unreachable, never a quote miss.
-      const usable = r.ok && r.text.length > 800;
-      pages.set(u, { status: usable ? "ok" : "unreachable", text: usable ? r.text : "" });
+      const quotes = quotesFor(u);
+      const texts: string[] = [];
+      for (let i = 0; i < 3; i++) {
+        // first try asks for English; later tries drop the header in case the site serves a different English variant
+        const r = await fetchText(u, 9000, { english: i === 0 });
+        // JS-only shells and bot walls come back "ok" but near-empty: unreachable, never a quote miss.
+        if (r.ok && r.text.length > 800) texts.push(r.text);
+        const joined = texts.join(" ");
+        if (texts.length && quotes.every((q) => quoteCoverage(q, joined) >= EXACT)) break;
+        if (i < 2) await new Promise((res) => setTimeout(res, 400));
+      }
+      pages.set(u, texts.length ? { status: "ok", text: texts.join(" ") } : { status: "unreachable", text: "" });
     }),
   );
 

@@ -83,14 +83,20 @@ export function htmlToText(html: string): string {
     .replace(/\s+/g, " ");
 }
 
-export async function fetchText(url: string, timeoutMs = 8000): Promise<{ ok: boolean; status: number; finalUrl: string; text: string; contentType: string }> {
+export async function fetchText(url: string, timeoutMs = 8000, opts: { english?: boolean } = { english: true }): Promise<{ ok: boolean; status: number; finalUrl: string; text: string; contentType: string }> {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), timeoutMs);
   try {
     const r = await fetch(url, {
       signal: ctl.signal,
       redirect: "follow",
-      headers: { "user-agent": "CliffBot/0.1 (OAuth setup research; contact via repo)", accept: "text/html,application/json;q=0.9,*/*;q=0.5" },
+      headers: {
+        "user-agent": "CliffBot/0.1 (OAuth setup research; contact via repo)",
+        accept: "text/html,application/json;q=0.9,*/*;q=0.5",
+        // Without this, Google's docs randomly answer with machine-translated pages (e.g. lang="zh-CN-x-mtfrom-en"),
+        // which made identical quotes pass on one fetch and "fail" on the next.
+        ...(opts.english === false ? {} : { "accept-language": "en-US,en;q=0.9" }),
+      },
     });
     const ct = r.headers.get("content-type") ?? "";
     const raw = await r.text();

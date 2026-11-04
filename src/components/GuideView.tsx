@@ -4,6 +4,7 @@ import { ClaimChips, type ClaimBundle } from "./ClaimChips";
 import { STATUS_STYLE } from "@/lib/status";
 import { CliffCalculator } from "./CliffCalculator";
 import { Artifacts } from "./Artifacts";
+import { ReverifyButton } from "./ReverifyButton";
 import { fmtDays } from "@/lib/cliff";
 
 const LEVEL: Record<Guide["difficulty"]["level"], string> = {
@@ -76,6 +77,7 @@ export function GuideView({ guide, versionId, createdAt, latest }: { guide: Guid
           <span className="ml-auto text-xs text-muted">
             Generated {createdAt.slice(0, 10)} · {latest ? "latest version" : <Link href={`/apps/${guide.app.slug}`} className="underline">see latest</Link>} · <a className="underline" href={`/api/guides/${versionId}`}>raw JSON</a>
           </span>
+          <span className="w-full text-right"><ReverifyButton versionId={versionId} /></span>
         </div>
         {guide.provenance.corrections.length > 0 && (
           <p className="mt-2 text-xs text-muted">

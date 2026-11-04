@@ -9,7 +9,9 @@
     "lint": "eslint",
     "gen": "tsx scripts/gen.mts",
     "typecheck": "tsc --noEmit",
-    "attach": "tsx scripts/attach-evidence.mts"
+    "attach": "tsx scripts/attach-evidence.mts",
+    "reverify": "tsx scripts/reverify.mts",
+    "report": "tsx scripts/library-report.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.4.0",
