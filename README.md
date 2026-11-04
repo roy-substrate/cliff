@@ -1,75 +1,96 @@
 # Cliff
 
-OAuth app setup and approval guides for people building agents that connect to other people's apps.
+**OAuth setup, minus the headache.** Find out what it takes to connect an app, get approved and go live.
 
-> Most OAuth guides tell you how hard a provider is. That is the wrong unit. Approval difficulty depends on the scopes your agent requests, who will connect, and how you distribute. Cliff asks for those three things, shows where the cliff is, and shows how sure we are of every claim.
+- Live: https://cliff-omega.vercel.app
+- Built for the Composio APM, Integrations take-home.
 
-Built for the Composio APM, Integrations take-home.
+Most OAuth guides tell you how hard a provider is. That's the wrong unit. Approval difficulty depends on the scopes your agent requests, who will connect and how you distribute. Gmail is minutes for `gmail.send` to yourself and weeks plus a paid security assessment for `gmail.readonly` to the public. Cliff shows you which one you're signing up for, and how sure it is of every claim.
 
 ## What it does
 
-- **Library**: ready-made guides for a set of apps chosen to span the difficulty range (instant to weeks plus cost).
-- **Live generation**: type any app name or website. Agents investigate in real time, cite what they find, and say what they could not verify. The run streams so you can watch it work.
-- **The cliff calculator**: pick what your agent must do, who will connect, and how many users. The tier you trip and the critical path to production re-render, with provider wait time drawn as wait time.
-- **Build or borrow first**: every guide opens with whether you need your own OAuth app at all, using Composio's managed-auth directory (127 managed toolkits, 275 bring-your-own).
-- **Evidence on every claim**: tested, primary, secondary, inferred or unverified, with the quote, URL and fetch date one click away.
-- **Belief diff**: what the model believed before researching, compared with what the sources said.
-- **Paperwork drafts**: scope justification, consent-screen copy, privacy clause and demo-video shot list, drafted from the guide's own sources.
+- **Directory:** guides for apps chosen to span the difficulty range, from instant (GitHub, Notion, Calendly) to weeks plus cost (Gmail restricted scopes).
+- **Live investigation:** type any app name or website. Pip, the mascot, investigates in real time: finds the developer docs, extracts facts with exact quotes, probes public endpoints, re-checks every quote, then writes the guide. Every message on screen is a real pipeline event.
+- **Build or borrow first:** each guide opens with whether you need your own OAuth app at all, using Composio's managed-auth directory.
+- **The cliff calculator:** pick what your agent must do, who connects and how many users. The review tier and the critical path to production update, with provider-owned waits drawn as waits and unknown waits marked unknown.
+- **Setup journey:** numbered stops, each tagged *you*, *Pip can do this* or *waiting on the provider*, expanding into details and sources.
+- **Evidence on every claim:** a dot that opens the quote, URL and fetch date. Statuses are tested, from the docs, third-party, inferred and unverified.
+- **How we know:** what the model believed before research next to what the sources said, plus every correction and everything that couldn't be verified.
+- **Paperwork drafts:** scope justification, consent-screen copy, privacy clause and demo-video shot list, from the guide's own sources.
+- **Share and re-verify:** every guide version has a permanent link and raw JSON. "Re-verify sources" re-fetches every cited page and publishes a new version, with no model calls.
 
 ## How it works
 
 ```
-resolve ─┬─ Composio lookup
-         └─ prior beliefs (model memory, before research)
-discover (web search) → 3 extractors in parallel (web fetch, verbatim quotes)
-                      ∥ probes (public endpoints, no login)
-→ VERIFY (re-fetch every cited page, check each quote, find cross-source conflicts)
-→ write (verified claims only) → publish
+identify ─┬─ Composio managed-auth lookup
+          └─ prior beliefs (model memory, recorded before research)
+find docs (web search) → 3 extractors in parallel (web fetch, verbatim quotes)
+                       ∥ probes (public endpoints, no login)
+→ double-check (re-fetch every cited page, check each quote, cross-source conflicts)
+→ write guide (verified facts only) → publish (immutable version)
 ```
 
-- Guides are structured data (`src/lib/schema.ts`). The page renders from it. Markdown and raw JSON are views.
-- **Verification runs before writing.** In the first full run an extractor invented a "verbatim" quote (that Notion hides its Authorization URL until review). The verifier caught it, but the writer had already built the guide's headline gotcha on it. Now only claims that survive verification reach the writer, and a missing quote is a downgrade, not a footnote. See `evidence/spot-check-notion.md`.
-- The writer may only cite claim ids it was given. Invented ids are stripped.
-- The quote check is fair: markdown is stripped before comparing, partial matches count as "same fact, different wording", a quote found only on another site is downgraded from primary to secondary, and a conflict only demotes the weaker claim and only when the claims come from different sources.
-- Difficulty is computed in code from the facts (`src/lib/difficulty.ts`), never chosen by the model, so scores are comparable across guides.
-- The verifier re-fetches each cited page and checks the quote is really there (`src/pipeline/verify.ts`). A quote that is not found downgrades the claim.
-- If a run cannot find enough sources it publishes an explicit fallback guide: difficulty is unknown, not zero, and nothing is presented as a finding.
+Claude Sonnet 5.5 searches and extracts, Claude Opus 5.5 writes in three structured parts, and Claude Haiku 5.5 handles identification, conflicts and the belief diff. Difficulty is computed in code from facts (`src/lib/difficulty.ts`), never chosen by the model.
 
 ## Setup
 
 ```bash
 pnpm install
-cp .env.example .env.local   # add ANTHROPIC_API_KEY
-pnpm dev                     # http://localhost:3000
-pnpm gen "Notion"            # run the pipeline from the CLI and save to data/guides
-pnpm typecheck
+cp .env.example .env.local      # add ANTHROPIC_API_KEY
+pnpm dev                        # http://localhost:3000
 ```
 
-`COMPOSIO_API_KEY` is optional. Without it a static copy of Composio's managed-auth directory is used.
+Everything also runs from the command line:
+
+```bash
+pnpm gen "Notion"               # investigate an app and save its guide
+pnpm reverify [slug ...]        # re-check every cited page, no model calls
+pnpm attach <slug> --action "..." --observed "..." --claims c3,c4 --step 2   # add console evidence
+pnpm report                     # evidence summary across the directory
+```
+
+On Vercel, set `ANTHROPIC_API_KEY` and connect a private Vercel Blob store (`BLOB_READ_WRITE_TOKEN`) so live guides persist. `COMPOSIO_API_KEY` and the Upstash variables are optional.
 
 ## Key decisions
 
-1. **Difficulty is a function of scopes, audience and distribution**, not of the provider's name.
-2. **Evidence is a first-class field.** "Unverified" is a valid output and the product prefers it to a confident guess.
-3. **Decision first.** The first question is whether you need your own app. For most Composio users the right first answer is no.
-4. **Live runs are honest about their limits.** Public pages and unauthenticated probes only. No logging in to consoles live.
-5. **Depth over breadth.** A handful of guides checked against real sources beats a hundred unchecked ones.
+1. **Difficulty is a function of scopes, audience and distribution**, so the guide asks for those, not just the app name.
+2. **Verify before writing.** Only facts that survive the quote re-check reach the writer.
+3. **Evidence is a first-class field.** "Unverified" and "unknown" are valid outputs. The product prefers them to a confident guess.
+4. **Decision first.** For many Composio users the right first answer is "you don't need your own app yet".
+5. **Live runs never log in.** Console evidence is gathered separately and labelled as tested.
+6. **Depth over breadth.** A handful of guides checked against real sources beats a hundred unchecked ones.
+7. **A friendly face, serious content.** The playful design is for memorability. Every number and URL on screen still traces back to a source.
+
+## What we checked, learned and corrected
+
+Across 9 directory guides there are 383 claims: 37 tested, 323 quoted from the provider's own docs, 8 third-party, 13 inferred and 2 unverified. The quote re-check results:
+
+| Re-checked quotes | Exact match | Same fact, different wording | Not found | Page unreadable |
+|---|---|---|---|---|
+| 343 | 315 | 15 | 13 (4%) | 7 |
+
+Hand checks against the real sources:
+
+- **Notion docs:** 12 of 12 sampled facts confirmed on Notion's own pages. See `evidence/spot-check-notion.md`.
+- **GitHub console:** checked in a signed-in browser, read-only. 4 claims confirmed, 1 corrected, 3 new facts. See `evidence/console-github.md`.
+
+What building it taught us:
+
+- **Models invent "verbatim" quotes.** An extractor produced a convincing quote saying Notion hides its Authorization URL until review. Notion's docs say no such thing. The verifier caught it, but the writer had already built the headline gotcha on it. That's why verification now runs first.
+- **The verifier needed its own debugging.** It wrongly failed real quotes because the fetch tool returns markdown. Google's docs randomly serve machine-translated pages unless you ask for English. Fixing both cut the not-found rate from 9% to the 4% above. What remains are real misses.
+- **Stale facts lose to direct observation.** A third-party page said GitHub's form has one "Authorization callback URL". The live console shows up to 10 redirect URIs with optional wildcards.
+- **Current facts beat the model's memory.** The Slack guide states the current Marketplace bar, 10 workspaces active in the last 28 days, not the older figure of 5 still quoted around the web.
+- **The belief diff shows memory's errors.** The model assumed Notion and Calendly need review before strangers can connect. Their docs say they don't.
+
+What we couldn't verify:
+
+- **Review lengths:** Notion Marketplace, Dropbox production and Microsoft publisher verification lengths aren't documented on the pages read. The guides say "unknown" and don't guess.
+- **Other consoles:** these need throwaway accounts. The GitHub check is the template, and `pnpm attach` records the rest.
 
 ## Limitations
 
-- Model-driven search uses the basic web search and fetch tools on purpose. The newer "dynamic filtering" variants run model-written code in a hidden sandbox; in testing the code printed nothing back, the model never saw the results, and it returned an empty source list while filling gaps from memory.
-- The full guide schema exceeds the API's structured-output grammar limit, so the writer runs as three smaller calls (core facts, cliff model, steps). A JSON fallback with schema validation exists if a part is still too large.
-- Live runs do not log in to provider consoles. Console-level evidence for library apps is recorded by hand or with a browser agent beforehand and attached as `tested` evidence.
-- Many provider pages are rendered by JavaScript. Probes cannot always see login walls or error text, and say so.
-- Wait times are ranges drawn from docs and developer reports, not promises.
-- Library guides ship with the deployment from `data/guides`. Live-generated guides are stored in a private Vercel Blob store, because a serverless function's disk is per-instance and temporary (the first deploy wrote live guides to disk and their share links 404ed on the next request).
-- The in-memory rate limiter resets on each serverless instance. Set the Upstash variables for a shared limit.
-- Drafted documents are templates, not legal advice.
-
-## Status
-
-Verified so far: the schema, the critical-path scheduler, the quote verifier (a real quote is confirmed and a fabricated one is downgraded on a live page), the public probes, the streaming endpoint, the failure and fallback path, and the UI on a synthetic fixture. The model-driven stages (resolve through synthesize) have not yet been run against the live API, so no accuracy figures are reported yet.
-
-## Accuracy check
-
-To be filled in after the library is generated and a sample of claims is checked against the providers' own consoles and docs: claims checked, confirmed, corrected, and could not verify.
+- Live runs use public pages and unauthenticated probes only. Many consoles are JavaScript-rendered, so probes can't see login walls, and they say so.
+- Wait times are ranges from docs and developer reports, not promises.
+- The in-memory rate limit (3 live runs per hour and 20 per day per visitor) resets per server instance. Set the Upstash variables for a shared limit.
+- Drafted paperwork is a template, not legal advice.
+- A live run costs about $0.35 to $0.75 in API usage. Repeat visits are free because guides are cached.
