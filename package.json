@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "gen": "tsx scripts/gen.mts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "attach": "tsx scripts/attach-evidence.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.4.0",
