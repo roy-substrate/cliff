@@ -91,7 +91,7 @@ export const RawClaims = z.object({
 export type RawClaimsT = z.infer<typeof RawClaims>;
 export const WORKERS = {
   mechanics:
-    "OAuth mechanics: flow type, authorize/token endpoints, PKCE support, access/refresh token lifetimes, redirect URI rules (https? localhost? wildcards? exact match?), scope names and what each allows, which scopes require review.",
+    "OAuth mechanics: whether the provider offers other ways to authenticate (another app type such as GitHub Apps, personal tokens, API keys, service accounts) and which one the provider itself recommends and why; flow type, authorize/token endpoints, PKCE support, access/refresh token lifetimes, redirect URI rules (https? localhost? wildcards? exact match?), scope names and what each allows, which scopes require review.",
   approval:
     "Approval and limits: is review/verification required before arbitrary users can connect, for which scopes or distribution modes; documented wait times; prerequisites (domain verification, privacy policy, demo video, business verification, security assessment, paid plan); fees; caps and restrictions while unapproved (user caps, test users, token expiry); reasons apps get rejected; marketplace vs unlisted distribution; whether the provider's terms restrict automated or AI-agent access.",
   console:
@@ -134,6 +134,7 @@ YOUR PART: the guide's core facts.
 - app_specific_gotchas: up to 5 things true of THIS provider that would surprise a developer; fewer is fine if claims do not support more.
 - artifacts: offer the kinds that apply to this provider's review process.
 - difficulty_drivers: short phrases naming what makes this hard (empty if nothing). long_wait_days: the longest single provider wait, in days, from claims (0 if none).
+- auth_alternatives: every other way to authenticate that the claims mention (a different app type, personal tokens, API keys, service accounts), one line each as "<name>: <when to choose it instead, and the trade-off>". If the provider itself recommends a different model than OAuth apps, say so here and in build_or_borrow.verdict. Empty only if the claims mention none.
 - If the provider has no OAuth for third parties, set has_oauth=false and explain alternatives in auth_alternatives.`,
   cliff: `${SYNTH_RULES}
 YOUR PART: the cliff model. Difficulty depends on scopes x audience x distribution, not the provider's name.

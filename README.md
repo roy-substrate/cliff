@@ -23,11 +23,14 @@ resolve ─┬─ Composio lookup
          └─ prior beliefs (model memory, before research)
 discover (web search) → 3 extractors in parallel (web fetch, verbatim quotes)
                       ∥ probes (public endpoints, no login)
-→ synthesize (claims only) → verify (re-fetch, quote check, staleness, conflicts) → publish
+→ VERIFY (re-fetch every cited page, check each quote, find cross-source conflicts)
+→ write (verified claims only) → publish
 ```
 
 - Guides are structured data (`src/lib/schema.ts`). The page renders from it. Markdown and raw JSON are views.
+- **Verification runs before writing.** In the first full run an extractor invented a "verbatim" quote (that Notion hides its Authorization URL until review). The verifier caught it, but the writer had already built the guide's headline gotcha on it. Now only claims that survive verification reach the writer, and a missing quote is a downgrade, not a footnote. See `evidence/spot-check-notion.md`.
 - The writer may only cite claim ids it was given. Invented ids are stripped.
+- The quote check is fair: markdown is stripped before comparing, partial matches count as "same fact, different wording", a quote found only on another site is downgraded from primary to secondary, and a conflict only demotes the weaker claim and only when the claims come from different sources.
 - Difficulty is computed in code from the facts (`src/lib/difficulty.ts`), never chosen by the model, so scores are comparable across guides.
 - The verifier re-fetches each cited page and checks the quote is really there (`src/pipeline/verify.ts`). A quote that is not found downgrades the claim.
 - If a run cannot find enough sources it publishes an explicit fallback guide: difficulty is unknown, not zero, and nothing is presented as a finding.
@@ -54,6 +57,8 @@ pnpm typecheck
 
 ## Limitations
 
+- Model-driven search uses the basic web search and fetch tools on purpose. The newer "dynamic filtering" variants run model-written code in a hidden sandbox; in testing the code printed nothing back, the model never saw the results, and it returned an empty source list while filling gaps from memory.
+- The full guide schema exceeds the API's structured-output grammar limit, so the writer runs as three smaller calls (core facts, cliff model, steps). A JSON fallback with schema validation exists if a part is still too large.
 - Live runs do not log in to provider consoles. Console-level evidence for library apps is recorded by hand or with a browser agent beforehand and attached as `tested` evidence.
 - Many provider pages are rendered by JavaScript. Probes cannot always see login walls or error text, and say so.
 - Wait times are ranges drawn from docs and developer reports, not promises.
