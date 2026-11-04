@@ -1,0 +1,2141 @@
+{
+  "versionId": "pipedrive-202611041238-q1ei",
+  "slug": "pipedrive",
+  "created_at": "2026-11-04T12:38:41.191Z",
+  "created_by": "library",
+  "cost_usd": 0.6866461,
+  "guide": {
+    "app": {
+      "name": "Pipedrive",
+      "slug": "pipedrive",
+      "homepage": "https://www.pipedrive.com",
+      "developer_portal": "https://developers.pipedrive.com/"
+    },
+    "summary": "Pipedrive uses standard OAuth 2.0 authorization code flow on oauth.pipedrive.com, with 60-minute access tokens and refresh tokens that expire after 60 days of non-use. You register apps in the Developer Hub, which you reach through a developer sandbox account. Saving a draft with just a name and callback URL gives you a client_id and client_secret right away. Your biggest decision comes first. A private app skips review and can be shared with any Pipedrive company through a direct install link. A public app must pass a review that can take up to 21 business days, needs a demo video and test accounts, and stays unlisted until you click Publish. App type cannot be changed after creation. Composio has no managed auth for Pipedrive, so you need your own app.",
+    "has_oauth": true,
+    "auth_alternatives": [
+      "Private app (OAuth, not listed): choose this to skip the Marketplace review and share the app through a direct install link with any Pipedrive company. The trade-off is that it is never listed in the Marketplace, and app type cannot be switched to public later.",
+      "Personal API tokens: only workable for your own single-account scripts. Pipedrive recommends OAuth instead, checks that approved apps do not collect users' API tokens, and on the Lite plan gives API tokens 20 requests per 2 seconds versus 80 for OAuth apps."
+    ],
+    "build_or_borrow": {
+      "composio_managed": false,
+      "composio_slug": "pipedrive",
+      "reasons_to_bring_own": [
+        "Composio does not offer managed auth for Pipedrive, so you must supply your own client_id and client_secret.",
+        "Pipedrive requires OAuth 2.0 for Marketplace apps and does not allow approved apps to collect users' API tokens, so OAuth through your own app is the supported path.",
+        "OAuth apps get higher burst rate limits than API tokens on the Lite plan (80 versus 20 requests per 2 seconds)."
+      ],
+      "agent_access_allowed": "unknown",
+      "verdict": "Build your own Pipedrive OAuth app, because Composio has no managed auth for Pipedrive. Start as a private app shared by direct install link unless you need a Marketplace listing, since Pipedrive itself recommends OAuth over personal API tokens and private apps skip review."
+    },
+    "time": {
+      "hands_on_minutes": 300,
+      "approval_required": true,
+      "approval_wait_days_min": null,
+      "approval_wait_days_max": 21,
+      "unapproved_usable": true,
+      "claim_ids": [
+        "c1",
+        "c22",
+        "c38",
+        "c15",
+        "c16",
+        "c3",
+        "c19",
+        "c40",
+        "c23"
+      ]
+    },
+    "prerequisites": [
+      {
+        "text": "A Pipedrive developer sandbox account, which is how you reach the Developer Hub (Settings > (company name) Developer Hub).",
+        "claim_ids": [
+          "c4",
+          "c14"
+        ]
+      },
+      {
+        "text": "An app name and a working OAuth callback URL. These are the only fields needed to save a draft and get credentials.",
+        "claim_ids": [
+          "c16",
+          "c15",
+          "c18"
+        ]
+      },
+      {
+        "text": "For public apps: Terms of Service and Privacy Policy pages.",
+        "claim_ids": [
+          "c6"
+        ]
+      },
+      {
+        "text": "For public apps: a demo video explaining how each permission and scope is used and showing key functionality, plus working test accounts for reviewers.",
+        "claim_ids": [
+          "c5",
+          "c24",
+          "c41"
+        ]
+      },
+      {
+        "text": "A minimal scope list chosen in the OAuth & access scopes tab.",
+        "claim_ids": [
+          "c8",
+          "c20",
+          "c36"
+        ]
+      }
+    ],
+    "oauth": {
+      "flow": "authorization_code",
+      "authorize_url": "https://oauth.pipedrive.com/oauth/authorize",
+      "token_url": "https://oauth.pipedrive.com/oauth/token",
+      "pkce": "unknown",
+      "refresh_tokens": "yes",
+      "token_lifetime": "Access tokens last 60 minutes. Refresh tokens expire after 60 days of non-use, and each use resets that to 60 days. Authorization codes expire in 5 minutes.",
+      "redirect_uri_rules": [
+        "redirect_uri must match the callback URL registered with the app, or no code is sent.",
+        "The callback URL must actually work before you submit for approval."
+      ],
+      "claim_ids": [
+        "c28",
+        "c29",
+        "c25",
+        "c27",
+        "c30",
+        "c31",
+        "c32",
+        "c33",
+        "c34",
+        "c18",
+        "c7"
+      ]
+    },
+    "blockers": [
+      {
+        "text": "App type (public or private) is permanent once chosen in Developer Hub.",
+        "workaround": "Decide before creating the app. Pick private if you only need direct-link installs. Pick public only if you need a Marketplace listing and can accept review.",
+        "severity": "high",
+        "claim_ids": [
+          "c17",
+          "c3",
+          "c19"
+        ]
+      },
+      {
+        "text": "Public apps need review that can take up to 21 business days. Any rejection reasons arrive by email and must be fixed before you resubmit.",
+        "workaround": "Use a private app with a direct install link while the public app is under review, or skip public listing entirely.",
+        "severity": "med",
+        "claim_ids": [
+          "c1",
+          "c22",
+          "c38",
+          "c9",
+          "c40"
+        ]
+      },
+      {
+        "text": "Review requires a demo video covering scope usage and working test accounts.",
+        "workaround": "Record the video against the minimal scope set and prepare test accounts before clicking Send to review.",
+        "severity": "med",
+        "claim_ids": [
+          "c5",
+          "c24",
+          "c41",
+          "c23"
+        ]
+      }
+    ],
+    "app_specific_gotchas": [
+      {
+        "text": "Public vs private app type cannot be changed after you create the app.",
+        "claim_ids": [
+          "c17"
+        ]
+      },
+      {
+        "text": "An approved app is unlisted by default. Nothing appears in the Marketplace until you click Publish in Developer Hub.",
+        "claim_ids": [
+          "c10",
+          "c21"
+        ]
+      },
+      {
+        "text": "Refresh tokens die after 60 days without use. Users of an agent that stays idle that long will have to reconnect unless you refresh on a schedule.",
+        "claim_ids": [
+          "c33"
+        ]
+      },
+      {
+        "text": "Users must accept all requested scopes at once, and the admin scope only works if the installing user is a company admin.",
+        "claim_ids": [
+          "c36",
+          "c37"
+        ]
+      },
+      {
+        "text": "API usage is capped by a daily per-company token budget based on plan and seats. Once it is exhausted, requests return HTTP 429.",
+        "claim_ids": [
+          "c11",
+          "c12"
+        ]
+      }
+    ],
+    "agent_vs_human": {
+      "agent_can": [
+        "Write the OAuth integration code: authorize redirect, code exchange within 5 minutes using Basic auth, and refresh handling for 60-minute tokens",
+        "List the callback URL(s) to register",
+        "Draft the scope justification and a minimal scope list",
+        "Draft the demo video shot list and Privacy Policy / Terms text for review",
+        "Lay out the public vs private trade-off for the developer's decision",
+        "Add handling for HTTP 429 when the daily budget runs out"
+      ],
+      "human_must": [
+        "Create the developer sandbox account and log in to Developer Hub",
+        "Choose public or private app type (irreversible)",
+        "Save the draft app and store the client_id and client_secret",
+        "Publish the Terms of Service and Privacy Policy pages",
+        "Record the demo video and set up test accounts",
+        "Click Send to review and handle any emailed rejections",
+        "Click Publish after approval"
+      ]
+    },
+    "artifacts": [
+      {
+        "kind": "redirect_uri_list",
+        "label": "Callback URL to register in Developer Hub"
+      },
+      {
+        "kind": "scope_justification",
+        "label": "Per-scope justification for minimal scopes"
+      },
+      {
+        "kind": "demo_video_shotlist",
+        "label": "Demo video showing scope usage and key functionality"
+      },
+      {
+        "kind": "privacy_clause",
+        "label": "Privacy Policy section covering Pipedrive data"
+      }
+    ],
+    "cliff": {
+      "scope_tiers": [
+        {
+          "scope": "admin",
+          "purpose": "Actions that need company-level admin rights in the customer's Pipedrive account",
+          "action_label": "Act with admin rights in the customer's company",
+          "tier": "admin_only",
+          "gate": "The installing user must have admin rights in the company. A non-admin cannot install an app that requests it. Because users accept or deny all scopes together, adding admin blocks every non-admin from installing at all. For public apps it also goes through the Marketplace review like every other scope.",
+          "cheaper_alternative": "Leave admin out unless a core feature needs it. The docs say to request only the scopes the use case needs. Which non-admin scope covers a given feature is not stated in the claims.",
+          "claim_ids": [
+            "c37",
+            "c36",
+            "c8",
+            "c20"
+          ]
+        },
+        {
+          "scope": "Use-case scopes (names not covered by the provided claims)",
+          "purpose": "Reading and writing the CRM data the agent works on",
+          "action_label": "Access the customer's CRM data the agent needs",
+          "tier": "unknown",
+          "gate": "The claims document no per-scope review tiers. The gate depends on app type. Private apps skip approval. Public apps must pass review, and reviewers expect a demo video that explains why each permission and scope is used. Users see all scopes on the consent dialog and must accept them all or none.",
+          "cheaper_alternative": null,
+          "claim_ids": [
+            "c20",
+            "c8",
+            "c36",
+            "c26",
+            "c19",
+            "c2",
+            "c5",
+            "c24"
+          ]
+        }
+      ],
+      "paths": [
+        {
+          "distribution": "internal",
+          "verdict": "Easiest path, with no review and no provider wait. Register a private app, save the draft to get credentials, and install it through the direct link. The catch is that app type cannot be changed after creation, so a private app can never become a Marketplace listing.",
+          "total_days_min": 0,
+          "total_days_max": 0,
+          "nodes": [
+            {
+              "id": "i1",
+              "title": "Create a developer sandbox account and open Developer Hub (Settings > company name Developer Hub)",
+              "actor": "developer",
+              "est_minutes": 20,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c4",
+                "c14"
+              ]
+            },
+            {
+              "id": "i2",
+              "title": "Lay out the private vs public trade-off (app type is immutable once chosen)",
+              "actor": "agent",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c17",
+                "c19",
+                "c40"
+              ]
+            },
+            {
+              "id": "i3",
+              "title": "Decide on app type: private",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i2"
+              ],
+              "claim_ids": [
+                "c17",
+                "c40"
+              ]
+            },
+            {
+              "id": "i4",
+              "title": "List the exact callback URL and the minimal scope set",
+              "actor": "agent",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c16",
+                "c20",
+                "c34",
+                "c8"
+              ]
+            },
+            {
+              "id": "i5",
+              "title": "Create the app with name and callback URL, set scopes, and save the draft to get client_id and client_secret",
+              "actor": "developer",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i1",
+                "i3",
+                "i4"
+              ],
+              "claim_ids": [
+                "c15",
+                "c16",
+                "c20"
+              ]
+            },
+            {
+              "id": "i6",
+              "title": "Implement the OAuth code flow: authorize, exchange the code within 5 minutes with Basic auth, and refresh hourly",
+              "actor": "agent",
+              "est_minutes": 120,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i4"
+              ],
+              "claim_ids": [
+                "c28",
+                "c29",
+                "c30",
+                "c31",
+                "c32",
+                "c33",
+                "c7"
+              ]
+            },
+            {
+              "id": "i7",
+              "title": "Install via the direct link, click Allow and install, and test",
+              "actor": "developer",
+              "est_minutes": 20,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "i5",
+                "i6"
+              ],
+              "claim_ids": [
+                "c19",
+                "c26"
+              ]
+            }
+          ]
+        },
+        {
+          "distribution": "unlisted_public",
+          "verdict": "This is the best fit for an agent product that does not need a listing. A private app skips approval and can be shared with any Pipedrive company through a direct install link. You give up Marketplace discovery, and the app can never be converted to public later.",
+          "total_days_min": 0,
+          "total_days_max": 0,
+          "nodes": [
+            {
+              "id": "u1",
+              "title": "Create a developer sandbox account and open Developer Hub",
+              "actor": "developer",
+              "est_minutes": 20,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c4",
+                "c14"
+              ]
+            },
+            {
+              "id": "u2",
+              "title": "Lay out the trade-off: a private link needs no review, while Marketplace needs a public app and review, and the choice is permanent",
+              "actor": "agent",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c17",
+                "c3",
+                "c19",
+                "c38"
+              ]
+            },
+            {
+              "id": "u3",
+              "title": "Decide on app type: private",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u2"
+              ],
+              "claim_ids": [
+                "c17"
+              ]
+            },
+            {
+              "id": "u4",
+              "title": "List the callback URL and minimal scopes",
+              "actor": "agent",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c16",
+                "c34",
+                "c8",
+                "c36"
+              ]
+            },
+            {
+              "id": "u5",
+              "title": "Save the draft app to get client_id and client_secret",
+              "actor": "developer",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u1",
+                "u3",
+                "u4"
+              ],
+              "claim_ids": [
+                "c15",
+                "c16"
+              ]
+            },
+            {
+              "id": "u6",
+              "title": "Implement the OAuth flow and token refresh",
+              "actor": "agent",
+              "est_minutes": 120,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u4"
+              ],
+              "claim_ids": [
+                "c28",
+                "c29",
+                "c30",
+                "c31",
+                "c32",
+                "c33"
+              ]
+            },
+            {
+              "id": "u7",
+              "title": "Test the install, then share the direct install link with customer companies",
+              "actor": "developer",
+              "est_minutes": 20,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "u5",
+                "u6"
+              ],
+              "claim_ids": [
+                "c3",
+                "c19",
+                "c26"
+              ]
+            }
+          ]
+        },
+        {
+          "distribution": "marketplace",
+          "verdict": "This is the hard path. It needs a public app, ToS and privacy pages, a demo video covering scopes, test accounts, and a working callback URL, then review that may take up to 21 business days. The day totals below count business days and assume no rejection. A rejection is emailed and must be fixed before you resubmit, which restarts the wait. After approval the app stays unlisted until you click Publish.",
+          "total_days_min": 0,
+          "total_days_max": 21,
+          "nodes": [
+            {
+              "id": "m1",
+              "title": "Create a developer sandbox account and open Developer Hub",
+              "actor": "developer",
+              "est_minutes": 20,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c4",
+                "c14"
+              ]
+            },
+            {
+              "id": "m2",
+              "title": "Lay out the public vs private trade-off (immutable)",
+              "actor": "agent",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c17"
+              ]
+            },
+            {
+              "id": "m3",
+              "title": "Decide on app type: public",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "m2"
+              ],
+              "claim_ids": [
+                "c17",
+                "c2"
+              ]
+            },
+            {
+              "id": "m4",
+              "title": "List the callback URL and minimal scopes",
+              "actor": "agent",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c16",
+                "c8",
+                "c20",
+                "c34"
+              ]
+            },
+            {
+              "id": "m5",
+              "title": "Save the draft app (name and callback) to get credentials",
+              "actor": "developer",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "m1",
+                "m3",
+                "m4"
+              ],
+              "claim_ids": [
+                "c15",
+                "c16"
+              ]
+            },
+            {
+              "id": "m6",
+              "title": "Implement OAuth 2.0 as the primary auth method, with refresh and no collection of API tokens",
+              "actor": "agent",
+              "est_minutes": 180,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "m4"
+              ],
+              "claim_ids": [
+                "c7",
+                "c35",
+                "c39",
+                "c28",
+                "c29",
+                "c30",
+                "c33"
+              ]
+            },
+            {
+              "id": "m7",
+              "title": "Draft Terms of Service and Privacy Policy copy",
+              "actor": "agent",
+              "est_minutes": 60,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c6"
+              ]
+            },
+            {
+              "id": "m8",
+              "title": "Approve and publish the ToS and Privacy Policy pages",
+              "actor": "developer",
+              "est_minutes": 45,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "m7"
+              ],
+              "claim_ids": [
+                "c6"
+              ]
+            },
+            {
+              "id": "m9",
+              "title": "Draft a demo video script explaining each permission and scope",
+              "actor": "agent",
+              "est_minutes": 30,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "m4"
+              ],
+              "claim_ids": [
+                "c5",
+                "c24"
+              ]
+            },
+            {
+              "id": "m10",
+              "title": "Record the demo video showing key functionality and scope usage",
+              "actor": "developer",
+              "est_minutes": 90,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "m9",
+                "m6"
+              ],
+              "claim_ids": [
+                "c5",
+                "c24",
+                "c41"
+              ]
+            },
+            {
+              "id": "m11",
+              "title": "Set up working test accounts for reviewers",
+              "actor": "developer",
+              "est_minutes": 30,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "m5"
+              ],
+              "claim_ids": [
+                "c24",
+                "c41"
+              ]
+            },
+            {
+              "id": "m12",
+              "title": "Complete the registration form, confirm the callback URL works, install and test, and preview the listing",
+              "actor": "developer",
+              "est_minutes": 60,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "m5",
+                "m6",
+                "m8",
+                "m10",
+                "m11"
+              ],
+              "claim_ids": [
+                "c23",
+                "c18",
+                "c16"
+              ]
+            },
+            {
+              "id": "m13",
+              "title": "Click Send to review",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "m12"
+              ],
+              "claim_ids": [
+                "c23"
+              ]
+            },
+            {
+              "id": "m14",
+              "title": "Pipedrive review (up to 21 business days; rejections are emailed and must be fixed before resubmitting)",
+              "actor": "provider_wait",
+              "est_minutes": 0,
+              "wait_days_min": 0,
+              "wait_days_max": 21,
+              "wait_unknown": false,
+              "depends_on": [
+                "m13"
+              ],
+              "claim_ids": [
+                "c1",
+                "c22",
+                "c38",
+                "c9"
+              ]
+            },
+            {
+              "id": "m15",
+              "title": "Click Publish in Developer Hub to list the approved app (it stays unlisted until then)",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "m14"
+              ],
+              "claim_ids": [
+                "c10",
+                "c21"
+              ]
+            }
+          ]
+        }
+      ],
+      "unapproved_mode": {
+        "limits": [
+          "A private app needs no approval. Any Pipedrive company can install it through the direct install link, but it is never listed in the Marketplace.",
+          "The claims do not say whether a public app's draft can be installed by outside companies before approval. Do not rely on it.",
+          "Admin-scoped apps can only be installed by users with admin rights in the company.",
+          "Rate limits apply to every app: a daily token budget per company of 30,000 base tokens times a plan multiplier times seats, plus purchased top-ups. Requests beyond it return HTTP 429. On the Lite plan, OAuth apps get 80 requests per 2 seconds, compared with 20 for API tokens.",
+          "Access tokens last 60 minutes. Refresh tokens expire after 60 days of non-use, so idle installs must re-authorize."
+        ],
+        "breaks_at": "It breaks the moment you want a Marketplace listing. App type is immutable, so a private app cannot be converted. You must register a new public app, which goes through review (up to 21 business days) and then needs a manual Publish. What happens to existing installs during that switch is not documented.",
+        "claim_ids": [
+          "c3",
+          "c19",
+          "c40",
+          "c17",
+          "c37",
+          "c11",
+          "c12",
+          "c13",
+          "c32",
+          "c33",
+          "c38",
+          "c21"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "n": 1,
+        "title": "Get a developer sandbox account",
+        "detail_md": "Sign up for a Pipedrive developer sandbox account. It is the only way into the Developer Hub, and you need it before any app work or approval process starts.",
+        "actor": "developer",
+        "claim_ids": [
+          "c4"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 15
+      },
+      {
+        "n": 2,
+        "title": "Open the Developer Hub",
+        "detail_md": "In the sandbox account go to **Settings > (company name) Developer Hub**. Older docs call it Marketplace Manager. The probe confirms developers.pipedrive.com is reachable.",
+        "actor": "developer",
+        "claim_ids": [
+          "c14",
+          "c42"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      },
+      {
+        "n": 3,
+        "title": "Decide: public or private app (irreversible)",
+        "detail_md": "App type cannot be changed after you choose it. The agent can lay out the trade-off, but you make the call.\n\n- **Private**: no review and no Marketplace listing. You share it through an unlisted direct install link, and any Pipedrive company can install it.\n- **Public**: must pass Marketplace approval. Reviews can take up to 21 business days. After approval you can list it publicly.\n\nMy recommendation: if your agent's users can be onboarded with a link, start private and ship now. Choose public only if you need a Marketplace listing.",
+        "actor": "developer",
+        "claim_ids": [
+          "c17",
+          "c3",
+          "c19",
+          "c40",
+          "c2",
+          "c38"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 4,
+        "title": "Prepare callback URL and minimal scope list",
+        "detail_md": "The agent drafts these two things:\n\n- **Callback URL**: the exact URL your backend will serve. The code is only sent to a `redirect_uri` that matches the registered callback, so it must be live and correct.\n- **Scope list**: the fewest scopes your use case needs. Users must accept or deny all scopes together. Avoid the admin scope unless you truly need it, because it requires the installing user to have admin rights in their company.\n\nThe provided material lists no individual scope names, so map them from the OAuth & access scopes tab.",
+        "actor": "agent",
+        "claim_ids": [
+          "c34",
+          "c18",
+          "c8",
+          "c20",
+          "c36",
+          "c37"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 20
+      },
+      {
+        "n": 5,
+        "title": "Save a draft app to get client credentials",
+        "detail_md": "Create the app in Developer Hub. A draft only needs an app name and the OAuth callback URL. Saving the draft gives you the `client_id` and `client_secret`. The other required fields are only checked when you submit for review. Store the secret securely.",
+        "actor": "developer",
+        "claim_ids": [
+          "c15",
+          "c16"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 6,
+        "title": "Set scopes",
+        "detail_md": "In the **OAuth & access scopes** tab, select only the scopes from step 4.",
+        "actor": "developer",
+        "claim_ids": [
+          "c20",
+          "c36"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 7,
+        "title": "Implement the OAuth 2.0 flow",
+        "detail_md": "Pipedrive publishes no discovery document: both well-known URLs return 404. Hardcode the endpoints.\n\n- **Authorize**: `GET https://oauth.pipedrive.com/oauth/authorize` with `client_id`, `redirect_uri` and `state`.\n- **Token**: `POST https://oauth.pipedrive.com/oauth/token`, authenticated with HTTP Basic Auth using client_id:client_secret. Putting them in the body works but is not recommended.\n- Exchange the code right away, because it expires in 5 minutes.\n- Access tokens last 60 minutes. Refresh them through the same token endpoint.\n- Refresh tokens expire after 60 days without use, and each use resets that clock. Plan for re-auth when a user goes idle for a long time.\n- Never collect users' API tokens. Approved apps must use OAuth as their primary auth method.",
+        "actor": "agent",
+        "claim_ids": [
+          "c28",
+          "c25",
+          "c29",
+          "c30",
+          "c27",
+          "c31",
+          "c32",
+          "c33",
+          "c7",
+          "c39",
+          "c35",
+          "c43",
+          "c44",
+          "c45"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 180
+      },
+      {
+        "n": 8,
+        "title": "Handle rate limits and the daily budget",
+        "detail_md": "Each company gets a daily token budget of 30,000 base tokens x plan multiplier x seats, plus any top-ups. Once that budget is used up, requests return HTTP 429. Add backoff and surface the error clearly to users. OAuth apps get a higher burst limit than API tokens on Lite: 80 versus 20 requests per 2 seconds.",
+        "actor": "agent",
+        "claim_ids": [
+          "c11",
+          "c12",
+          "c13"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 60
+      },
+      {
+        "n": 9,
+        "title": "Install and test end to end",
+        "detail_md": "Install the app on your sandbox. The user sees a consent dialog listing the scopes and clicks **Allow and install**. No separate workspace-admin approval step is documented. Confirm that the callback works, tokens arrive and refresh succeeds. A broken callback blocks submission.",
+        "actor": "developer",
+        "claim_ids": [
+          "c26",
+          "c18",
+          "c23"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 30
+      },
+      {
+        "n": 10,
+        "title": "Private path: share the install link (done)",
+        "detail_md": "If you chose private, share the direct installation link with your users. There is no review and no wait, and you are finished here. Skip the remaining steps.",
+        "actor": "developer",
+        "claim_ids": [
+          "c3",
+          "c19",
+          "c40"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      },
+      {
+        "n": 11,
+        "title": "Public path: draft Terms of Service and Privacy Policy",
+        "detail_md": "Both pages are required. The agent can draft the text. You review it and publish it on your domain.",
+        "actor": "agent",
+        "claim_ids": [
+          "c6"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 60
+      },
+      {
+        "n": 12,
+        "title": "Public path: record demo video and set up test accounts",
+        "detail_md": "Record a video that explains why you use each permission and scope and shows the app's key functionality. Also prepare working test accounts for the reviewers.",
+        "actor": "developer",
+        "claim_ids": [
+          "c5",
+          "c24",
+          "c41"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 120
+      },
+      {
+        "n": 13,
+        "title": "Public path: complete the form, preview, Send to review",
+        "detail_md": "Fill in the full registration form, install and test, preview the listing, then click **Send to review**.",
+        "actor": "developer",
+        "claim_ids": [
+          "c23",
+          "c2",
+          "c16"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 30
+      },
+      {
+        "n": 14,
+        "title": "Public path: Pipedrive review",
+        "detail_md": "Pipedrive owns this time. The documented upper bound is **up to 21 business days**. The minute figure is only 21 x 24h, so actual calendar time is longer once weekends are counted. No typical duration is documented.",
+        "actor": "provider_wait",
+        "claim_ids": [
+          "c1",
+          "c22",
+          "c38"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 30240
+      },
+      {
+        "n": 15,
+        "title": "Public path: fix rejection reasons if any",
+        "detail_md": "Rejection reasons arrive by email. Fix all of them before you resubmit. Each resubmission goes back into review, and no shorter re-review time is documented.",
+        "actor": "developer",
+        "claim_ids": [
+          "c9"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 60
+      },
+      {
+        "n": 16,
+        "title": "Public path: click Publish",
+        "detail_md": "An approved app stays unpublished and unlisted until you click **Publish** in Developer Hub.",
+        "actor": "developer",
+        "claim_ids": [
+          "c10",
+          "c21"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      }
+    ],
+    "status": "full",
+    "difficulty": {
+      "drivers": [
+        "irreversible public/private app type choice",
+        "public review up to 21 business days",
+        "demo video and test accounts required for review"
+      ],
+      "score": 5,
+      "level": "days"
+    },
+    "composio": {
+      "toolkit_slug": "pipedrive",
+      "tool_count": null,
+      "managed_auth": false,
+      "auth_config_fields": [],
+      "redirect_uri": null
+    },
+    "provenance": {
+      "claims": [
+        {
+          "id": "c1",
+          "text": "Public app reviews may take up to 21 business days (notice as of the page's last update).",
+          "evidence_ids": [
+            "e1"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "time",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c2",
+          "text": "Each new public app submitted to the Marketplace must pass the approval process.",
+          "evidence_ids": [
+            "e2"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c3",
+          "text": "Internal-only apps need no submission. A private app can be shared with any Pipedrive company through a direct installation link.",
+          "evidence_ids": [
+            "e3"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c4",
+          "text": "Developers need a developer sandbox account to get access to the Developer Hub before starting the approval process.",
+          "evidence_ids": [
+            "e4"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c5",
+          "text": "Reviewers require a demo video explaining the usage of permissions and scopes and showing the app's key functionality.",
+          "evidence_ids": [
+            "e5"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c6",
+          "text": "A Terms of Service page and a Privacy Policy page are required for the app.",
+          "evidence_ids": [
+            "e6"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c7",
+          "text": "The app must use OAuth 2.0 and refresh access tokens after their 60-minute lifetime.",
+          "evidence_ids": [
+            "e7"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c8",
+          "text": "The app should request only the scopes needed for its use case.",
+          "evidence_ids": [
+            "e8"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c9",
+          "text": "Rejection reasons are emailed, and they must be resolved before resubmission.",
+          "evidence_ids": [
+            "e9"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c10",
+          "text": "After approval an app is unlisted by default, and the developer must click Publish to list it in the Marketplace.",
+          "evidence_ids": [
+            "e10"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c11",
+          "text": "The daily API token budget per company is 30,000 base tokens times a plan multiplier times the number of seats, plus any purchased top-ups.",
+          "evidence_ids": [
+            "e11"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": "2026-09-17",
+          "stale": false
+        },
+        {
+          "id": "c12",
+          "text": "Once the daily budget is exhausted, requests are rejected with HTTP 429.",
+          "evidence_ids": [
+            "e12"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": "2026-09-17",
+          "stale": false
+        },
+        {
+          "id": "c13",
+          "text": "OAuth apps on the Lite plan get 80 requests per 2 seconds, compared with 20 for API tokens.",
+          "evidence_ids": [
+            "e13"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": "2026-09-17",
+          "stale": false
+        },
+        {
+          "id": "c14",
+          "text": "Developers reach the console (Developer Hub, formerly Marketplace Manager) through their developer sandbox account under Settings > (company name) Developer Hub.",
+          "evidence_ids": [
+            "e14"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c15",
+          "text": "Saving a draft app is what yields the client_id and client_secret.",
+          "evidence_ids": [
+            "e15"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c16",
+          "text": "Only app name and OAuth callback URL are required to save a draft. Other required fields are validated at review submission.",
+          "evidence_ids": [
+            "e16"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c17",
+          "text": "App type (public or private) is immutable once chosen in Developer Hub.",
+          "evidence_ids": [
+            "e17"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "blocker",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c18",
+          "text": "A non-functioning callback URL must be fixed before submitting for approval.",
+          "evidence_ids": [
+            "e18"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c19",
+          "text": "Private apps skip the approval process and are not published in the Marketplace. They are shared through an unlisted direct install link.",
+          "evidence_ids": [
+            "e19"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c20",
+          "text": "Scopes are set in the OAuth & access scopes tab of app registration, and the docs advise choosing the fewest needed.",
+          "evidence_ids": [
+            "e20"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c21",
+          "text": "After approval the app is unpublished by default. The developer must click Publish in Developer Hub to release it.",
+          "evidence_ids": [
+            "e21"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c22",
+          "text": "Public app review may take up to 21 business days.",
+          "evidence_ids": [
+            "e22"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "time",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c23",
+          "text": "The review submission flow ends with clicking Send to review after filling the registration form, installing and testing, and previewing the listing.",
+          "evidence_ids": [
+            "e23"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c24",
+          "text": "Review requires a demo video explaining the use of permissions and scopes, plus working test accounts.",
+          "evidence_ids": [
+            "e24"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c25",
+          "text": "The authorize endpoint is on oauth.pipedrive.com.",
+          "evidence_ids": [
+            "e25"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c26",
+          "text": "The customer approves the app by clicking Allow and install on the consent dialog, which shows the scopes. No separate workspace-admin approval step is stated on this page.",
+          "evidence_ids": [
+            "e26"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c27",
+          "text": "The authorization code expires in 5 minutes. The token endpoint is POST /oauth/token with Basic auth using client_id and client_secret.",
+          "evidence_ids": [
+            "e27"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c28",
+          "text": "Pipedrive's authorize endpoint is GET https://oauth.pipedrive.com/oauth/authorize, which takes client_id, redirect_uri and an optional state.",
+          "evidence_ids": [
+            "e28"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c29",
+          "text": "The token endpoint is POST https://oauth.pipedrive.com/oauth/token. It is used to exchange the code and to refresh tokens.",
+          "evidence_ids": [
+            "e29"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c30",
+          "text": "Token requests must be authenticated with HTTP Basic Auth using the client_id and client_secret. Sending them in the request body is allowed but not recommended.",
+          "evidence_ids": [
+            "e30"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c31",
+          "text": "The authorization code expires in 5 minutes.",
+          "evidence_ids": [
+            "e31"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c32",
+          "text": "Access tokens expire after 60 minutes.",
+          "evidence_ids": [
+            "e32"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c33",
+          "text": "Refresh tokens expire after 60 days of non-use. Each use resets the expiry to 60 days.",
+          "evidence_ids": [
+            "e33"
+          ],
+          "status": "primary",
+          "confidence": 0.7,
+          "topic": "limit",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c34",
+          "text": "The redirect_uri must be the callback URL registered with the app. The authorization code is sent there only if it matches the registered value.",
+          "evidence_ids": [
+            "e34"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c35",
+          "text": "OAuth 2.0 is required for apps in the Pipedrive Marketplace.",
+          "evidence_ids": [
+            "e35"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2026-06-09",
+          "stale": false
+        },
+        {
+          "id": "c36",
+          "text": "The user must accept or deny all requested scopes together, so apps should request only the scopes they need.",
+          "evidence_ids": [
+            "e36"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "scope",
+          "last_seen_date": "2026-05-04",
+          "stale": false
+        },
+        {
+          "id": "c37",
+          "text": "The admin scope requires the installing user to have admin rights in the company.",
+          "evidence_ids": [
+            "e37"
+          ],
+          "status": "primary",
+          "confidence": 0.7,
+          "topic": "scope",
+          "last_seen_date": "2026-05-04",
+          "stale": false
+        },
+        {
+          "id": "c38",
+          "text": "Public apps must pass Pipedrive's approval process. Reviews may take up to 21 business days.",
+          "evidence_ids": [
+            "e38"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c39",
+          "text": "Pipedrive checks that approved apps use OAuth 2.0 as their primary authentication method and do not collect users' API tokens. This is the recommended path over personal API tokens.",
+          "evidence_ids": [
+            "e39"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c40",
+          "text": "Internal-only apps can skip review by being registered as private apps and shared through a direct installation link.",
+          "evidence_ids": [
+            "e40"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c41",
+          "text": "The review requires a demo video explaining the use of permissions and scopes, and test accounts.",
+          "evidence_ids": [
+            "e41"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "review",
+          "last_seen_date": "2025-11-12",
+          "stale": false
+        },
+        {
+          "id": "c42",
+          "text": "Probe: GET https://developers.pipedrive.com/ returned HTTP 200 -> https://developers.pipedrive.com/",
+          "evidence_ids": [
+            "e42"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c43",
+          "text": "Probe: GET https://www.pipedrive.com/.well-known/openid-configuration returned HTTP 404: no discovery document on pipedrive.com",
+          "evidence_ids": [
+            "e43"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c44",
+          "text": "Probe: GET https://www.pipedrive.com/.well-known/oauth-authorization-server returned HTTP 404: no discovery document on pipedrive.com",
+          "evidence_ids": [
+            "e44"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c45",
+          "text": "Probe: GET https://oauth.pipedrive.com/oauth/authorize?client_id=cliff-probe-nonexistent&redirect_uri=https://example.invalid/callback returned HTTP 200 -> https://oauth.pipedrive.com/auth/login?return_url=https%3A%2F%2Foauth.pipedrive.com%2Foauth%2Fauthorize%3Fclient_id%3Dcl |  Log in Not a Pipedrive user? Try it free Log in Please log in to",
+          "evidence_ids": [
+            "e45"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "public app reviews may take up to 21 business days.",
+          "fetched_at": "2026-11-04T12:37:36.323Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e2",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Each new public app submitted to the Pipedrive Marketplace has to pass our approval process",
+          "fetched_at": "2026-11-04T12:37:36.323Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e3",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Submitting the app is unnecessary if it\u2019s only used internally.",
+          "fetched_at": "2026-11-04T12:37:36.323Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e4",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Request [a developer sandbox account](https://developers.pipedrive.com/) to get access to the Developer Hub",
+          "fetched_at": "2026-11-04T12:37:36.323Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e5",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Provide our team with a demo video in which you explain the usage of permissions and scopes, as well as demonstrate the key functionality of your app",
+          "fetched_at": "2026-11-04T12:37:36.323Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e6",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Your app has a Privacy Policy webpage of a legal document",
+          "fetched_at": "2026-11-04T12:37:36.323Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e7",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Your app [refreshes the access token](https://pipedrive.readme.io/docs/marketplace-oauth-authorization#step-7-refreshing-the-tokens) once its 60-minute lifetime expires",
+          "fetched_at": "2026-11-04T12:37:36.323Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e8",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Your app only requests necessary [scopes and permissions](https://pipedrive.readme.io/docs/marketplace-scopes-and-permissions-explanations) for your particular use case and functionality",
+          "fetched_at": "2026-11-04T12:37:36.323Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e9",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Before the app can be submitted again, you\u2019ll need to resolve the reason(s) for the rejection",
+          "fetched_at": "2026-11-04T12:37:36.323Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e10",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "The app is unlisted from the Marketplace by default after approval.",
+          "fetched_at": "2026-11-04T12:37:36.324Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e11",
+          "url": "https://pipedrive.readme.io/docs/core-api-concepts-rate-limiting",
+          "quote": "30,000 base tokens \u00d7 subscription plan multiplier \u00d7 number of seats (+ purchased API Token top-ups)",
+          "fetched_at": "2026-11-04T12:37:36.324Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e12",
+          "url": "https://pipedrive.readme.io/docs/core-api-concepts-rate-limiting",
+          "quote": "all further API requests will be **rejected with a 429 (Too Many Requests)** status code.",
+          "fetched_at": "2026-11-04T12:37:36.324Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e13",
+          "url": "https://pipedrive.readme.io/docs/core-api-concepts-rate-limiting",
+          "quote": "| Lite     | 20 requests per 2 seconds  | 80 requests per 2 seconds  |",
+          "fetched_at": "2026-11-04T12:37:36.324Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e14",
+          "url": "https://pipedrive.readme.io/docs/developer-hub.md",
+          "quote": "You can access Developer Hub by logging in to your [developer sandbox account](https://app.pipedrive.com/auth/login) and going to [*Settings > (company name) Developer Hub*]",
+          "fetched_at": "2026-11-04T12:37:36.948Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e15",
+          "url": "https://pipedrive.readme.io/docs/developer-hub.md",
+          "quote": "First, you need to save a draft app to start working on your app. Why? Because this is where you\u2019ll get your `client_id` and `client_secret`",
+          "fetched_at": "2026-11-04T12:37:36.948Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e16",
+          "url": "https://pipedrive.readme.io/docs/developer-hub.md",
+          "quote": "The two main required fields that are necessary **to save your draft app** are your **app name** and the **OAuth callback URL**.",
+          "fetched_at": "2026-11-04T12:37:36.948Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e17",
+          "url": "https://pipedrive.readme.io/docs/developer-hub.md",
+          "quote": "NB: Do pick your app type carefully, as it cannot be changed later on Developer Hub.",
+          "fetched_at": "2026-11-04T12:37:36.948Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e18",
+          "url": "https://pipedrive.readme.io/docs/developer-hub.md",
+          "quote": "If you initially inserted a non-functioning OAuth callback URL, make sure you change it to a functioning one before submitting it for approval.",
+          "fetched_at": "2026-11-04T12:37:36.948Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e19",
+          "url": "https://pipedrive.readme.io/docs/developer-hub.md",
+          "quote": "They don\u2019t have to go through the app approval process and will not be published in the Pipedrive Marketplace.",
+          "fetched_at": "2026-11-04T12:37:36.948Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e20",
+          "url": "https://pipedrive.readme.io/docs/developer-hub.md",
+          "quote": "It\u2019s important to choose only the scopes necessary for your app.",
+          "fetched_at": "2026-11-04T12:37:36.948Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e21",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "The app is unlisted from the Marketplace by default after approval. If you wish to have it published, you will need to go to \u201c...\u201d next to your approved app\u2019s name in Developer Hub and click on \u201cPublish\u201d.",
+          "fetched_at": "2026-11-04T12:37:36.948Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e22",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "public app reviews may take up to 21 business days.",
+          "fetched_at": "2026-11-04T12:37:36.949Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e23",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Click on \u201cSend to review\u201d",
+          "fetched_at": "2026-11-04T12:37:36.949Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e24",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Provide our team with a demo video in which you explain the usage of permissions and scopes, as well as demonstrate the key functionality of your app",
+          "fetched_at": "2026-11-04T12:37:36.949Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e25",
+          "url": "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+          "quote": "GET https://oauth.pipedrive.com/oauth/authorize?client_id=b4d083d9216986345b32&state=148aHxbdd92&redirect_uri=https://awesomeapp.com/oauth/callback",
+          "fetched_at": "2026-11-04T12:37:36.949Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e26",
+          "url": "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+          "quote": "Customers should confirm their wish to install the app by clicking \"Allow and install\" or deny authorization by clicking \"Cancel\".",
+          "fetched_at": "2026-11-04T12:37:36.949Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e27",
+          "url": "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+          "quote": "Note that the `authorization_code` expires in **5 minutes**.",
+          "fetched_at": "2026-11-04T12:37:36.949Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e28",
+          "url": "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+          "quote": "GET https://oauth.pipedrive.com/oauth/authorize?client_id=b4d083d9216986345b32&state=148aHxbdd92&redirect_uri=https://awesomeapp.com/oauth/callback",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e29",
+          "url": "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+          "quote": "POST https://oauth.pipedrive.com/oauth/token",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e30",
+          "url": "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+          "quote": "Note that authentication could also be done by providing values for the `client_id` and the `client_secret` in the request body, but it's not recommended.",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 0.86,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e31",
+          "url": "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+          "quote": "Note that the `authorization_code` expires in **5 minutes**.",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e32",
+          "url": "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+          "quote": "`access_token` expires after 60 minutes.",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e33",
+          "url": "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+          "quote": "`refresh_token` will expire if it isn't used in **60 days**. Each time `refresh_token` is used, its expiry date is **reset** back to **60 days**.",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": false,
+          "coverage": 0.74,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e34",
+          "url": "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+          "quote": "The callback URL you provided when you registered your app. Authorization code will be sent to that URL (if it matches with the value you entered in the registration form)",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e35",
+          "url": "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+          "quote": "Using OAuth 2.0 is necessary for developing apps that are available in the Pipedrive Marketplace.",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e36",
+          "url": "https://pipedrive.readme.io/docs/marketplace-scopes-and-permissions-explanations",
+          "quote": "The user has the option to **either accept or deny all scopes**.",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e37",
+          "url": "https://pipedrive.readme.io/docs/marketplace-scopes-and-permissions-explanations",
+          "quote": "The admin scope requires the user who is installing an app (from the Pipedrive's Marketplace), to have admin rights within the company.",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": false,
+          "coverage": 0.65,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e38",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "public app reviews may take up to 21 business days.",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e39",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Your app does not collect, store, or unnecessarily use the [API token](https://pipedrive.readme.io/docs/how-to-find-the-api-token) of a user",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e40",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Submitting the app is unnecessary if it\u2019s only used internally. You can instead [create a Private app]",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e41",
+          "url": "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+          "quote": "Provide our team with a demo video in which you explain the usage of permissions and scopes, as well as demonstrate the key functionality of your app",
+          "fetched_at": "2026-11-04T12:37:38.525Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e42",
+          "url": "https://developers.pipedrive.com/",
+          "quote": "HTTP 200 -> https://developers.pipedrive.com/",
+          "fetched_at": "2026-11-04T12:37:25.133Z",
+          "kind": "console_probe",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e43",
+          "url": "https://www.pipedrive.com/.well-known/openid-configuration",
+          "quote": "HTTP 404: no discovery document on pipedrive.com",
+          "fetched_at": "2026-11-04T12:37:26.145Z",
+          "kind": "well_known",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e44",
+          "url": "https://www.pipedrive.com/.well-known/oauth-authorization-server",
+          "quote": "HTTP 404: no discovery document on pipedrive.com",
+          "fetched_at": "2026-11-04T12:37:26.578Z",
+          "kind": "well_known",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e45",
+          "url": "https://oauth.pipedrive.com/oauth/authorize",
+          "quote": "HTTP 200 -> https://oauth.pipedrive.com/auth/login?return_url=https%3A%2F%2Foauth.pipedrive.com%2Foauth%2Fauthorize%3Fclient_id%3Dcl |  Log in Not a Pipedrive user? Try it free Log in Please log in to continue Email Password Log in Remember me Forgot password? or access quickly Google SSO Don&#x27;t have an account? English (US) \ud55c\uad6d\uc5b4 \u7e41\u9ad4\u4e2d\u6587 \u65e5\u672c\u8a9e \u0423\u043a\u0440\u0430\u0457\u0301\u043d\u0441\u044c\u043a\u0430 \u043c\u043e\u0301\u0432\u0430 \u0420\u0443\u0441\u0441\u043a\u0438\u0439 \u010ce\u0161ti",
+          "fetched_at": "2026-11-04T12:37:27.877Z",
+          "kind": "console_probe",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        }
+      ],
+      "attempt_log": [
+        {
+          "id": "a_probe_1",
+          "at": "2026-11-04T12:37:25.133Z",
+          "mode": "probe",
+          "action": "GET https://developers.pipedrive.com/",
+          "observed": "HTTP 200 -> https://developers.pipedrive.com/",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c42"
+          ]
+        },
+        {
+          "id": "a_probe_2",
+          "at": "2026-11-04T12:37:26.145Z",
+          "mode": "probe",
+          "action": "GET https://www.pipedrive.com/.well-known/openid-configuration",
+          "observed": "HTTP 404: no discovery document on pipedrive.com",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c43"
+          ]
+        },
+        {
+          "id": "a_probe_3",
+          "at": "2026-11-04T12:37:26.578Z",
+          "mode": "probe",
+          "action": "GET https://www.pipedrive.com/.well-known/oauth-authorization-server",
+          "observed": "HTTP 404: no discovery document on pipedrive.com",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c44"
+          ]
+        },
+        {
+          "id": "a_probe_4",
+          "at": "2026-11-04T12:37:27.877Z",
+          "mode": "probe",
+          "action": "GET https://oauth.pipedrive.com/oauth/authorize?client_id=cliff-probe-nonexistent&redirect_uri=https://example.invalid/callback",
+          "observed": "HTTP 200 -> https://oauth.pipedrive.com/auth/login?return_url=https%3A%2F%2Foauth.pipedrive.com%2Foauth%2Fauthorize%3Fclient_id%3Dcl |  Log in Not a Pipedrive user? Try it free Log in Please log in to continue Email Password Log in Remember me Forgot password? or access quickly Google SSO Don&#x27;t have an account? English (US) \ud55c\uad6d\uc5b4 \u7e41\u9ad4\u4e2d\u6587 \u65e5\u672c\u8a9e \u0423\u043a\u0440\u0430\u0457\u0301\u043d\u0441\u044c\u043a\u0430 \u043c\u043e\u0301\u0432\u0430 \u0420\u0443\u0441\u0441\u043a\u0438\u0439 \u010ce\u0161ti",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c45"
+          ]
+        }
+      ],
+      "corrections": [],
+      "belief_diff": [
+        {
+          "topic": "Does letting arbitrary users connect require provider review or verification?",
+          "prior_belief": "Yes, Pipedrive requires the app to pass a Marketplace review before arbitrary users outside your own company can install and connect it.",
+          "finding": "Public apps must pass Pipedrive's approval process before listing, while private apps skip review and are shared via an unlisted direct install link; the claims do not explicitly say unapproved public apps are limited to the developer's own company.",
+          "verdict": "confirmed",
+          "claim_ids": [
+            "c2",
+            "c38",
+            "c3",
+            "c19",
+            "c40"
+          ]
+        },
+        {
+          "topic": "Typical approval wait time",
+          "prior_belief": "Pipedrive Marketplace app review typically takes about 10 business days.",
+          "finding": "The claims state public app review may take up to 21 business days, not about 10.",
+          "verdict": "corrected",
+          "claim_ids": [
+            "c1",
+            "c22",
+            "c38"
+          ]
+        },
+        {
+          "topic": "Limits while the app is unapproved",
+          "prior_belief": "While unapproved, the app can only be installed by users in the developer's own company account, capped at 1 company and no external installs.",
+          "finding": "The claims do not address installation limits or company caps for unapproved apps.",
+          "verdict": "could_not_verify",
+          "claim_ids": []
+        },
+        {
+          "topic": "Fees or paid requirements",
+          "prior_belief": "Listing and submitting a public Pipedrive Marketplace app is free, with no fee charged to the developer.",
+          "finding": "The claims do not mention any fees or costs for listing or submitting an app.",
+          "verdict": "could_not_verify",
+          "claim_ids": []
+        },
+        {
+          "topic": "Key prerequisites (domain, privacy policy, video, business verification)",
+          "prior_belief": "A verified developer account, a privacy policy URL, a demo video, and a support contact are required, while a company domain is needed and business verification is not required.",
+          "finding": "The claims require a developer sandbox account (not a verified one), a demo video, and both a Terms of Service and a Privacy Policy page; they do not mention a support contact, company domain, or business verification.",
+          "verdict": "refined",
+          "claim_ids": [
+            "c4",
+            "c5",
+            "c6"
+          ]
+        },
+        {
+          "topic": "Redirect URI rules",
+          "prior_belief": "Redirect URIs must use HTTPS and exactly match a pre-registered value in the app settings, with no wildcards allowed.",
+          "finding": "The claims say the redirect_uri must match the registered callback URL and a non-functioning callback must be fixed before submission, but say nothing about HTTPS or wildcard rules.",
+          "verdict": "refined",
+          "claim_ids": [
+            "c34",
+            "c18"
+          ]
+        }
+      ],
+      "sources_searched": [
+        "https://pipedrive.readme.io/docs/marketplace-oauth-api",
+        "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+        "https://pipedrive.readme.io/docs/developer-hub.md",
+        "https://pipedrive.readme.io/docs/marketplace-scopes-and-permissions-explanations",
+        "https://pipedrive.readme.io/docs/marketplace-app-approval-process",
+        "https://pipedrive.readme.io/docs/core-api-concepts-rate-limiting",
+        "https://developers.pipedrive.com/tutorials/build-your-first-pipedrive-hello-world-app",
+        "https://www.github.com/pipedrive/client-nodejs"
+      ],
+      "uncertain": []
+    }
+  }
+}

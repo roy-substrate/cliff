@@ -1,0 +1,1482 @@
+{
+  "versionId": "openweathermap-202611041243-iej1",
+  "slug": "openweathermap",
+  "created_at": "2026-11-04T12:43:47.387Z",
+  "created_by": "library",
+  "cost_usd": 0.34131662,
+  "guide": {
+    "app": {
+      "name": "OpenWeatherMap",
+      "slug": "openweathermap",
+      "homepage": "https://openweathermap.org",
+      "developer_portal": "https://home.openweathermap.org"
+    },
+    "summary": "OpenWeatherMap has no OAuth and no app registration. You sign up with an email address, receive an API key (APPID), and pass it in the appid query parameter on every request. Nothing your users need to connect exists here: your agent calls the API with your own key on their behalf. The real constraints are account-wide call limits shared by all your users and keys, the free plan being locked to api.openweathermap.org, and key suspension if you exceed limits and ignore the warning email.",
+    "has_oauth": false,
+    "auth_alternatives": [
+      "API key (APPID): the only supported credential. Use one key held server-side by your agent, since weather data is not tied to an end user. The trade-off is that all usage across every key and product counts against your single account's limits, and there is no per-user consent or isolation."
+    ],
+    "build_or_borrow": {
+      "composio_managed": null,
+      "composio_slug": null,
+      "reasons_to_bring_own": [
+        "There is no OAuth app to build or borrow. You need your own OpenWeather account and API key, because the API key is the only credential.",
+        "No Composio toolkit or managed auth was found for this provider."
+      ],
+      "agent_access_allowed": "unknown",
+      "verdict": "Skip OAuth entirely: OpenWeatherMap has none, so sign up, take the emailed API key, store it server-side, and have your agent call the API with it on behalf of all users."
+    },
+    "time": {
+      "hands_on_minutes": 50,
+      "approval_required": false,
+      "approval_wait_days_min": null,
+      "approval_wait_days_max": null,
+      "unapproved_usable": true,
+      "claim_ids": [
+        "c11",
+        "c12",
+        "c22",
+        "c2"
+      ]
+    },
+    "prerequisites": [
+      {
+        "text": "An OpenWeather account created with an email address. The API key arrives in the confirmation email. No review, domain verification or privacy policy is mentioned as a prerequisite.",
+        "claim_ids": [
+          "c12",
+          "c22"
+        ]
+      },
+      {
+        "text": "Access to the account page to view existing keys or generate more.",
+        "claim_ids": [
+          "c2",
+          "c23"
+        ]
+      }
+    ],
+    "oauth": {
+      "flow": "unknown",
+      "authorize_url": null,
+      "token_url": null,
+      "pkce": "unknown",
+      "refresh_tokens": "unknown",
+      "token_lifetime": null,
+      "redirect_uri_rules": [
+        "Not applicable: OpenWeatherMap has no OAuth app registration and publishes no OAuth or OpenID discovery document."
+      ],
+      "claim_ids": [
+        "c1",
+        "c11",
+        "c22",
+        "c33",
+        "c34"
+      ]
+    },
+    "blockers": [
+      {
+        "text": "Call limits are enforced per account, combining every key and product. All of your agent's users share one quota.",
+        "workaround": "Cache results and call each location no more than once every 10 minutes, as OpenWeather recommends. Move to a paid plan if free limits are not enough.",
+        "severity": "med",
+        "claim_ids": [
+          "c5",
+          "c13",
+          "c17",
+          "c26",
+          "c6",
+          "c16",
+          "c20"
+        ]
+      },
+      {
+        "text": "Exceeding the limit triggers a warning email, and the key is suspended if you do not respond.",
+        "workaround": "Send the account email to a monitored inbox and respond promptly. When the limit is hit, retry after 10 minutes with the request unchanged.",
+        "severity": "med",
+        "claim_ids": [
+          "c8",
+          "c18",
+          "c30",
+          "c19"
+        ]
+      }
+    ],
+    "app_specific_gotchas": [
+      {
+        "text": "There is no OAuth at all, so there is no per-user connect flow to build. Your agent uses one API key for everyone.",
+        "claim_ids": [
+          "c1",
+          "c11",
+          "c24"
+        ]
+      },
+      {
+        "text": "Adding more API keys does not add quota. Limits count total account usage across all keys and products.",
+        "claim_ids": [
+          "c5",
+          "c26",
+          "c17"
+        ]
+      },
+      {
+        "text": "The free plan only works against api.openweathermap.org. Paid plans move you to a different endpoint, sent in the confirmation or activation email, so the base URL must be configurable.",
+        "claim_ids": [
+          "c7",
+          "c15",
+          "c27"
+        ]
+      },
+      {
+        "text": "OpenWeather does not provide technical support for using its API key inside third-party applications. You are on your own if something breaks in your agent integration.",
+        "claim_ids": [
+          "c10",
+          "c21",
+          "c31"
+        ]
+      },
+      {
+        "text": "When rate limited, retry after 10 minutes with the exact same request so OpenWeather's caching service can serve it.",
+        "claim_ids": [
+          "c19"
+        ]
+      }
+    ],
+    "agent_vs_human": {
+      "agent_can": [
+        "Write integration code that adds the appid query parameter to every request",
+        "Implement per-location caching at a 10-minute interval and unchanged-request retries",
+        "Make the API base URL configurable for a later move to a paid-plan endpoint"
+      ],
+      "human_must": [
+        "Sign up for an OpenWeather account with an email address and confirm it",
+        "Retrieve the API key from the email or account page and store it securely",
+        "Monitor the account email and respond to over-limit notices to avoid suspension",
+        "Decide whether to buy a paid plan and pay for it"
+      ]
+    },
+    "artifacts": [],
+    "cliff": {
+      "scope_tiers": [
+        {
+          "scope": "API key (appid query parameter)",
+          "purpose": "Call OpenWeather weather APIs on behalf of the agent. There is no OAuth and no scopes; one key grants access to the weather APIs your plan includes.",
+          "action_label": "Read weather data",
+          "tier": "none",
+          "gate": "No review, domain verification or privacy policy is described. The only gates are signing up with an email and staying inside the account-level call limits of your plan.",
+          "cheaper_alternative": null,
+          "claim_ids": [
+            "c1",
+            "c4",
+            "c11",
+            "c12",
+            "c24",
+            "c17",
+            "c33",
+            "c34"
+          ]
+        }
+      ],
+      "paths": [
+        {
+          "distribution": "internal",
+          "verdict": "Easy. This is not an OAuth integration. Sign up, take the API key from the confirmation email or the account page, and pass it as appid on every call. There is no app review. The only time you do not control is email delivery of the key, and no claim says how long that takes, so the total below excludes it. The real risks are the account-level call limits and the fact that OpenWeather does not give technical support for keys used inside third-party apps.",
+          "total_days_min": 0,
+          "total_days_max": 0,
+          "nodes": [
+            {
+              "id": "signup",
+              "title": "Sign up for an OpenWeather account with an email address",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c12",
+                "c22",
+                "c32"
+              ]
+            },
+            {
+              "id": "key_email",
+              "title": "Receive the API key in the confirmation email (also listed on the account page). Delivery time is not documented.",
+              "actor": "provider_wait",
+              "est_minutes": 0,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": true,
+              "depends_on": [
+                "signup"
+              ],
+              "claim_ids": [
+                "c2",
+                "c12",
+                "c23"
+              ]
+            },
+            {
+              "id": "store_key",
+              "title": "Copy the key from the account page into the agent's secret store. Generate a separate key there if you want one per environment.",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "key_email"
+              ],
+              "claim_ids": [
+                "c2",
+                "c23"
+              ]
+            },
+            {
+              "id": "code",
+              "title": "Write the integration: send every request to api.openweathermap.org on the free plan, with the key in the appid query parameter",
+              "actor": "agent",
+              "est_minutes": 60,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c3",
+                "c4",
+                "c7",
+                "c15",
+                "c27"
+              ]
+            },
+            {
+              "id": "throttle",
+              "title": "Add per-location caching (at most one call per location every 10 minutes) and retry handling that waits 10 minutes and resends the request unchanged",
+              "actor": "agent",
+              "est_minutes": 45,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "code"
+              ],
+              "claim_ids": [
+                "c6",
+                "c16",
+                "c19",
+                "c28"
+              ]
+            },
+            {
+              "id": "plan_choice",
+              "title": "Decide whether the free plan is enough or buy a paid plan. Paid plans use a different endpoint that arrives in the confirmation email.",
+              "actor": "developer",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "store_key"
+              ],
+              "claim_ids": [
+                "c7",
+                "c17",
+                "c20",
+                "c29"
+              ]
+            },
+            {
+              "id": "test",
+              "title": "Run a test call with the stored key and confirm data returns",
+              "actor": "agent",
+              "est_minutes": 10,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "store_key",
+                "throttle"
+              ],
+              "claim_ids": [
+                "c3",
+                "c25"
+              ]
+            }
+          ]
+        },
+        {
+          "distribution": "unlisted_public",
+          "verdict": "No review gate, but a policy cliff. There is no OAuth, so your users cannot connect their own OpenWeather accounts through a consent flow. Your two options are a shared key, where all users' usage is combined under your account's limits, or having each user paste their own key. OpenWeather does not give technical support for keys used in third-party apps. No publish toggle or admin approval is described. As with the internal path, key email delivery time is not documented and is not counted in the total.",
+          "total_days_min": 0,
+          "total_days_max": 0,
+          "nodes": [
+            {
+              "id": "signup",
+              "title": "Sign up for an OpenWeather account with an email address",
+              "actor": "developer",
+              "est_minutes": 5,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c12",
+                "c22"
+              ]
+            },
+            {
+              "id": "key_email",
+              "title": "Receive the API key by email. Delivery time is not documented.",
+              "actor": "provider_wait",
+              "est_minutes": 0,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": true,
+              "depends_on": [
+                "signup"
+              ],
+              "claim_ids": [
+                "c2",
+                "c12"
+              ]
+            },
+            {
+              "id": "key_model",
+              "title": "Decide the key model: one shared key on your account, where all usage is combined, or each user supplies their own key. The agent can lay out the trade-off; you decide.",
+              "actor": "developer",
+              "est_minutes": 20,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [],
+              "claim_ids": [
+                "c5",
+                "c13",
+                "c26",
+                "c10",
+                "c21",
+                "c31"
+              ]
+            },
+            {
+              "id": "code",
+              "title": "Write the integration, passing the appid on every call, plus a key-entry field if users bring their own keys",
+              "actor": "agent",
+              "est_minutes": 90,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "key_model"
+              ],
+              "claim_ids": [
+                "c3",
+                "c4",
+                "c14"
+              ]
+            },
+            {
+              "id": "throttle",
+              "title": "Add per-location caching (10 minutes) and 10-minute unchanged retries, so pooled usage stays under the account limit",
+              "actor": "agent",
+              "est_minutes": 45,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "code"
+              ],
+              "claim_ids": [
+                "c6",
+                "c16",
+                "c19"
+              ]
+            },
+            {
+              "id": "monitor",
+              "title": "Watch the account email inbox for over-limit notices and reply or upgrade before the key is suspended",
+              "actor": "developer",
+              "est_minutes": 15,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "key_email"
+              ],
+              "claim_ids": [
+                "c8",
+                "c18",
+                "c30"
+              ]
+            },
+            {
+              "id": "plan_choice",
+              "title": "Choose the free or a paid plan based on expected pooled calls per minute and per day. Payment is your step.",
+              "actor": "developer",
+              "est_minutes": 20,
+              "wait_days_min": 0,
+              "wait_days_max": 0,
+              "wait_unknown": false,
+              "depends_on": [
+                "key_model"
+              ],
+              "claim_ids": [
+                "c17",
+                "c20",
+                "c29",
+                "c7"
+              ]
+            }
+          ]
+        }
+      ],
+      "unapproved_mode": {
+        "limits": [
+          "There is no approval stage. The free key works right away against api.openweathermap.org.",
+          "Call limits are per account, and usage from all keys and products is combined, so extra keys do not add capacity.",
+          "Free-plan daily and per-minute limit values are not stated in the provided claims.",
+          "The recommended rate is at most one call per location every 10 minutes.",
+          "OpenWeather does not give technical support for keys used inside third-party applications."
+        ],
+        "breaks_at": "When the account exceeds its plan's call limit. Calls are then asked to retry after 10 minutes, and OpenWeather emails a notice suggesting a paid plan. If you do not respond, the key is suspended.",
+        "claim_ids": [
+          "c7",
+          "c15",
+          "c5",
+          "c13",
+          "c26",
+          "c17",
+          "c16",
+          "c19",
+          "c8",
+          "c18",
+          "c30",
+          "c10",
+          "c21"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "n": 1,
+        "title": "Confirm there is no OAuth app to register",
+        "detail_md": "OpenWeatherMap does not use OAuth. An API key (APPID) is the only credential needed (c1, c11, c24). Probes found no OpenID or OAuth discovery document on openweathermap.org (c33, c34). There is no client ID, client secret, redirect URI, scope list or app review to plan for. No Composio toolkit or managed auth was found for this provider, so you will wire it up yourself.",
+        "actor": "agent",
+        "claim_ids": [
+          "c1",
+          "c11",
+          "c22",
+          "c24",
+          "c33",
+          "c34"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      },
+      {
+        "n": 2,
+        "title": "Decide the credential model: one shared key or each user brings their own",
+        "detail_md": "This is your call, and it changes who pays and who gets suspended.\n\n- **Shared key (your account):** simplest for users. But call limits are counted per account, and usage from all keys and products is combined (c5, c13, c26). Plans set account-level daily and per-minute limits (c17). Every one of your users draws from the same pool.\n- **User-supplied key:** each user signs up and pastes their own APPID, so each user's limits are separate. More friction at onboarding.\n\nAlso note: OpenWeather says it does not give technical support for using its key inside third-party applications (c10, c21), and one source phrases this as not supporting that use (c31). Read their terms yourself before shipping a shared key in a multi-user product. The provided material does not say whether this is a prohibition or only a support limit.",
+        "actor": "developer",
+        "claim_ids": [
+          "c5",
+          "c13",
+          "c17",
+          "c26",
+          "c10",
+          "c21",
+          "c31"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 15
+      },
+      {
+        "n": 3,
+        "title": "Sign up for an OpenWeather account",
+        "detail_md": "Sign up with an email address at the account site. The home page redirects to the sign-in page (c32). No review, domain verification or privacy policy is listed as a prerequisite (c12).",
+        "actor": "developer",
+        "claim_ids": [
+          "c22",
+          "c12",
+          "c32"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      },
+      {
+        "n": 4,
+        "title": "Receive the API key by confirmation email (wait not documented)",
+        "detail_md": "The free API key is sent in a confirmation email after sign-up (c2, c12, c22). How long this email takes is **not documented**. Treat the wait as unknown, not as instant. The key is also listed on the account page (c2, c23).",
+        "actor": "provider_wait",
+        "claim_ids": [
+          "c2",
+          "c12",
+          "c22",
+          "c23"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 0
+      },
+      {
+        "n": 5,
+        "title": "Generate separate keys if you want them",
+        "detail_md": "More keys can be generated on the account page (c2, c23). Useful to separate dev and prod. Remember extra keys do not add capacity: limits are per account and all keys are combined (c5, c26).",
+        "actor": "developer",
+        "claim_ids": [
+          "c2",
+          "c23",
+          "c5",
+          "c26"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      },
+      {
+        "n": 6,
+        "title": "Write the integration code",
+        "detail_md": "- Store the key as a secret (your env var or secrets manager); never put it in client-side code.\n- Pass the key in the `appid` query parameter on every call (c4). Requests without a key are not processed (c3, c14, c25).\n- On the free plan, call only `api.openweathermap.org` (c7, c15, c27). Keep the base host configurable, because paid plans get a different endpoint in their confirmation email (c7, c15, c27).\n- If you chose user-supplied keys in step 2, add a field where the user pastes their APPID and a test call to validate it.",
+        "actor": "agent",
+        "claim_ids": [
+          "c4",
+          "c3",
+          "c14",
+          "c25",
+          "c7",
+          "c15",
+          "c27",
+          "c24"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 45
+      },
+      {
+        "n": 7,
+        "title": "Add per-location caching and limit-hit retry",
+        "detail_md": "- Cache results per location for 10 minutes. OpenWeather recommends at most one call per location every 10 minutes because the model does not update more often (c6, c16, c28).\n- When the limit is hit, retry after 10 minutes with the request unchanged so their caching service can handle it (c19).\n\nThis matters most with a shared key, since all your users share one account limit (c5).",
+        "actor": "agent",
+        "claim_ids": [
+          "c6",
+          "c16",
+          "c28",
+          "c19",
+          "c5"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 30
+      },
+      {
+        "n": 8,
+        "title": "Watch the account inbox for over-limit notices",
+        "detail_md": "Going over the limit does not suspend the key immediately. An email is sent first, suggesting a paid plan, and the key is suspended if there is no response (c8, c18, c30). Make sure the sign-up email is a monitored address, not a personal inbox that nobody reads. The deadline for responding is not documented.",
+        "actor": "developer",
+        "claim_ids": [
+          "c8",
+          "c18",
+          "c30"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      },
+      {
+        "n": 9,
+        "title": "Upgrade to a paid plan if free limits are not enough",
+        "detail_md": "Paid plans differ in included APIs, service level and calls per minute (c20, c29, c17). Prices and exact limits are not in the provided material. After paying, switch the base host to the endpoint given in the confirmation email (c7, c15, c27).",
+        "actor": "developer",
+        "claim_ids": [
+          "c20",
+          "c29",
+          "c17",
+          "c7",
+          "c15",
+          "c27"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 15
+      },
+      {
+        "n": 10,
+        "title": "Ship: no review or publish step",
+        "detail_md": "No app review is described (c11), no domain verification or privacy policy prerequisite is mentioned (c12), and no workspace admin approval or publish toggle is described (c31). Once the key works and caching is in place, the integration is shareable.",
+        "actor": "developer",
+        "claim_ids": [
+          "c11",
+          "c12",
+          "c31"
+        ],
+        "attempt_log_ids": [],
+        "est_minutes": 5
+      }
+    ],
+    "status": "full",
+    "difficulty": {
+      "drivers": [
+        "account-wide call limits shared by all users",
+        "key suspension if over-limit emails are ignored",
+        "no technical support for third-party app use"
+      ],
+      "score": 2,
+      "level": "unknown"
+    },
+    "composio": null,
+    "provenance": {
+      "claims": [
+        {
+          "id": "c1",
+          "text": "OpenWeather does not use OAuth in this documentation. An API key (APPID) is the only credential needed to call its weather APIs.",
+          "evidence_ids": [
+            "e1"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c2",
+          "text": "The API key is sent by email after sign-up. It is also listed on the account page, where more keys can be generated.",
+          "evidence_ids": [
+            "e2"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c3",
+          "text": "Every API call must include the API key. Requests without one are not processed.",
+          "evidence_ids": [
+            "e3"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c4",
+          "text": "The key is passed in the appid query parameter.",
+          "evidence_ids": [
+            "e4"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c5",
+          "text": "Call limits are counted per account. Usage from all keys and products is combined.",
+          "evidence_ids": [
+            "e5"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c6",
+          "text": "OpenWeather recommends at most one call per location every 10 minutes, because the model updates no more often than that.",
+          "evidence_ids": [
+            "e6"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c7",
+          "text": "The free plan can only use the api.openweathermap.org endpoint. Paid plans get a different endpoint in their confirmation email.",
+          "evidence_ids": [
+            "e7"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c8",
+          "text": "Going over the call limit does not suspend the key immediately. An email notification is sent first. The key is suspended if there is no response.",
+          "evidence_ids": [
+            "e8"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c9",
+          "text": "A suspended account gets an HTTP 429 response.",
+          "evidence_ids": [],
+          "status": "inferred",
+          "confidence": 0.35,
+          "topic": "blocker",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c10",
+          "text": "OpenWeather does not give technical support for using its API key inside third-party applications.",
+          "evidence_ids": [
+            "e9"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c11",
+          "text": "OpenWeatherMap does not use OAuth. An API key (APPID) is all that is needed to call its weather APIs, and no app review is described.",
+          "evidence_ids": [
+            "e10"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c12",
+          "text": "The free API key is sent in a confirmation email after you sign up with an email address. No review, domain verification or privacy policy is mentioned as a prerequisite.",
+          "evidence_ids": [
+            "e11"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c13",
+          "text": "Call limits apply at the account level. Usage from all API keys and products is combined.",
+          "evidence_ids": [
+            "e12"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c14",
+          "text": "Every API request must include an API key. Requests without one are not processed.",
+          "evidence_ids": [
+            "e13"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c15",
+          "text": "The free plan uses only the api.openweathermap.org endpoint. Paid plans use a different endpoint, which is sent in the activation email.",
+          "evidence_ids": [
+            "e14"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c16",
+          "text": "OpenWeather recommends calling each location no more than once every 10 minutes, because the model updates at most that often.",
+          "evidence_ids": [
+            "e15"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c17",
+          "text": "Plans differ in account-level daily and per-minute call limits, and these limits apply to total account usage.",
+          "evidence_ids": [
+            "e16"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c18",
+          "text": "If you exceed the limit, the key is not suspended at once. You get an email suggesting a paid plan, and the key is suspended if you don't respond.",
+          "evidence_ids": [
+            "e17"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "blocker",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c19",
+          "text": "When the limit is hit, you are asked to retry after 10 minutes. The retry should keep the request unchanged so the caching service can handle it.",
+          "evidence_ids": [
+            "e18"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "time",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c20",
+          "text": "Paid subscription plans are available if free-plan limits are not enough. They differ in the APIs included, service level and calls per minute.",
+          "evidence_ids": [
+            "e19"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "cost",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c21",
+          "text": "OpenWeather does not provide technical support for using its API key inside third-party applications.",
+          "evidence_ids": [
+            "e20"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c22",
+          "text": "OpenWeatherMap has no OAuth app registration. Developers sign up with an email, and an API key (APPID) is sent in a confirmation email.",
+          "evidence_ids": [
+            "e21"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c23",
+          "text": "API keys are listed on the account page, where more keys can be generated.",
+          "evidence_ids": [
+            "e22"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "step",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c24",
+          "text": "The API key is the only credential needed to call any weather API.",
+          "evidence_ids": [
+            "e23"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "prereq",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c25",
+          "text": "Every call must include the API key. Requests without one are not processed.",
+          "evidence_ids": [
+            "e24"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c26",
+          "text": "Call limits apply at the account level, not per key or per product.",
+          "evidence_ids": [
+            "e25"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c27",
+          "text": "The only endpoint for free calls is api.openweathermap.org. Paid plans use a different endpoint, which is sent in the confirmation email.",
+          "evidence_ids": [
+            "e26"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "endpoint",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c28",
+          "text": "The page recommends calling each location no more than once every 10 minutes.",
+          "evidence_ids": [
+            "e27"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "limit",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c29",
+          "text": "Paid subscription plans differ in the range of API products, service level and calls per minute.",
+          "evidence_ids": [
+            "e28"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "cost",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c30",
+          "text": "If an account exceeds its limit, a notification is emailed first. The key is suspended if there is no reply.",
+          "evidence_ids": [
+            "e29"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "blocker",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c31",
+          "text": "OpenWeather does not support using its API key inside third-party applications. The page doesn't describe any workspace admin approval or publish toggle.",
+          "evidence_ids": [
+            "e30"
+          ],
+          "status": "primary",
+          "confidence": 0.85,
+          "topic": "policy",
+          "last_seen_date": null,
+          "stale": false
+        },
+        {
+          "id": "c32",
+          "text": "Probe: GET https://home.openweathermap.org/ returned HTTP 200 -> https://home.openweathermap.org/users/sign_in",
+          "evidence_ids": [
+            "e31"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c33",
+          "text": "Probe: GET https://openweathermap.org/.well-known/openid-configuration returned HTTP 404: no discovery document on openweathermap.org",
+          "evidence_ids": [
+            "e32"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c34",
+          "text": "Probe: GET https://openweathermap.org/.well-known/oauth-authorization-server returned HTTP 404: no discovery document on openweathermap.org",
+          "evidence_ids": [
+            "e33"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "url": "https://openweathermap.org/appid",
+          "quote": "The API key is all you need to call any of our weather APIs.",
+          "fetched_at": "2026-11-04T12:42:56.545Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e2",
+          "url": "https://openweathermap.org/appid",
+          "quote": "Once you [sign up](https://openweathermap.org/home/sign_up) using your email, the API key (APPID) will be sent to you in a confirmation email.",
+          "fetched_at": "2026-11-04T12:42:56.545Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e3",
+          "url": "https://openweathermap.org/appid",
+          "quote": "Our platform only processes the API requests with an API key included.",
+          "fetched_at": "2026-11-04T12:42:56.545Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e4",
+          "url": "https://openweathermap.org/appid",
+          "quote": "api.openweathermap.org/data/2.5/forecast?id=524901&appid={API key}",
+          "fetched_at": "2026-11-04T12:42:56.545Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e5",
+          "url": "https://openweathermap.org/appid",
+          "quote": "API call limits are applied at the account level, not per API key or per product.",
+          "fetched_at": "2026-11-04T12:42:56.545Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e6",
+          "url": "https://openweathermap.org/appid",
+          "quote": "we recommend making API calls no more than once in 10 minutes for each location",
+          "fetched_at": "2026-11-04T12:42:56.545Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e7",
+          "url": "https://openweathermap.org/appid",
+          "quote": "the only endpoint for making **free** API calls is **api.openweathermap.org**.",
+          "fetched_at": "2026-11-04T12:42:56.545Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e8",
+          "url": "https://openweathermap.org/appid",
+          "quote": "we won\u2019t immediately suspend your API key if you exceed the call limit.",
+          "fetched_at": "2026-11-04T12:42:56.545Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e9",
+          "url": "https://openweathermap.org/appid",
+          "quote": "we do not provide technical support for using an OpenWeather API key inside third-party applications",
+          "fetched_at": "2026-11-04T12:42:56.545Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e10",
+          "url": "https://openweathermap.org/appid",
+          "quote": "The API key is all you need to call any of our weather APIs.",
+          "fetched_at": "2026-11-04T12:42:57.098Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e11",
+          "url": "https://openweathermap.org/appid",
+          "quote": "Once you [sign up](https://openweathermap.org/home/sign_up) using your email, the API key (APPID) will be sent to you in a confirmation email.",
+          "fetched_at": "2026-11-04T12:42:57.098Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e12",
+          "url": "https://openweathermap.org/appid",
+          "quote": "API call limits are applied at the account level, not per API key or per product.",
+          "fetched_at": "2026-11-04T12:42:57.098Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e13",
+          "url": "https://openweathermap.org/appid",
+          "quote": "Our platform only processes the API requests with an API key included.",
+          "fetched_at": "2026-11-04T12:42:57.098Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e14",
+          "url": "https://openweathermap.org/appid",
+          "quote": "the only endpoint for making **free** API calls is **api.openweathermap.org**.",
+          "fetched_at": "2026-11-04T12:42:57.098Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e15",
+          "url": "https://openweathermap.org/appid",
+          "quote": "we recommend making API calls no more than once in 10 minutes for each location",
+          "fetched_at": "2026-11-04T12:42:57.098Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e16",
+          "url": "https://openweathermap.org/appid",
+          "quote": "Subscription plans provide different account-level daily and per-minute API call limits.",
+          "fetched_at": "2026-11-04T12:42:57.098Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e17",
+          "url": "https://openweathermap.org/appid",
+          "quote": "In case we don\u2019t hear back from you, your API key will be suspended.",
+          "fetched_at": "2026-11-04T12:42:57.098Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e18",
+          "url": "https://openweathermap.org/appid",
+          "quote": "we would ask you to repeat your request in 10 minutes.",
+          "fetched_at": "2026-11-04T12:42:57.098Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e19",
+          "url": "https://openweathermap.org/appid",
+          "quote": "The subscription plans differ in the APIs products range, level of service provided, the overall amount of calls per minute and other features.",
+          "fetched_at": "2026-11-04T12:42:57.098Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e20",
+          "url": "https://openweathermap.org/appid",
+          "quote": "we do not provide technical support for using an OpenWeather API key inside third-party applications",
+          "fetched_at": "2026-11-04T12:42:57.098Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e21",
+          "url": "https://openweathermap.org/appid",
+          "quote": "Once you [sign up](https://openweathermap.org/home/sign_up) using your email, the API key (APPID) will be sent to you in a confirmation email.",
+          "fetched_at": "2026-11-04T12:42:57.181Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e22",
+          "url": "https://openweathermap.org/appid",
+          "quote": "Your API keys can always be found on your [account page](https://home.openweathermap.org/api_keys), where you can also generate additional API keys if needed.",
+          "fetched_at": "2026-11-04T12:42:57.181Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e23",
+          "url": "https://openweathermap.org/appid",
+          "quote": "The API key is all you need to call any of our weather APIs.",
+          "fetched_at": "2026-11-04T12:42:57.181Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e24",
+          "url": "https://openweathermap.org/appid",
+          "quote": "Our platform only processes the API requests with an API key included.",
+          "fetched_at": "2026-11-04T12:42:57.182Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e25",
+          "url": "https://openweathermap.org/appid",
+          "quote": "API call limits are applied at the account level, not per API key or per product.",
+          "fetched_at": "2026-11-04T12:42:57.182Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e26",
+          "url": "https://openweathermap.org/appid",
+          "quote": "the only endpoint for making **free** API calls is **api.openweathermap.org**.",
+          "fetched_at": "2026-11-04T12:42:57.182Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e27",
+          "url": "https://openweathermap.org/appid",
+          "quote": "we recommend making API calls no more than once in 10 minutes for each location",
+          "fetched_at": "2026-11-04T12:42:57.182Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e28",
+          "url": "https://openweathermap.org/appid",
+          "quote": "The subscription plans differ in the APIs products range, level of service provided, the overall amount of calls per minute and other features.",
+          "fetched_at": "2026-11-04T12:42:57.182Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e29",
+          "url": "https://openweathermap.org/appid",
+          "quote": "In case we don\u2019t hear back from you, your API key will be suspended.",
+          "fetched_at": "2026-11-04T12:42:57.182Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e30",
+          "url": "https://openweathermap.org/appid",
+          "quote": "we do not provide technical support for using an OpenWeather API key inside third-party applications",
+          "fetched_at": "2026-11-04T12:42:57.182Z",
+          "kind": "doc",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e31",
+          "url": "https://home.openweathermap.org/",
+          "quote": "HTTP 200 -> https://home.openweathermap.org/users/sign_in",
+          "fetched_at": "2026-11-04T12:42:50.072Z",
+          "kind": "console_probe",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e32",
+          "url": "https://openweathermap.org/.well-known/openid-configuration",
+          "quote": "HTTP 404: no discovery document on openweathermap.org",
+          "fetched_at": "2026-11-04T12:42:50.856Z",
+          "kind": "well_known",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e33",
+          "url": "https://openweathermap.org/.well-known/oauth-authorization-server",
+          "quote": "HTTP 404: no discovery document on openweathermap.org",
+          "fetched_at": "2026-11-04T12:42:50.945Z",
+          "kind": "well_known",
+          "quote_found": true,
+          "coverage": 1,
+          "fetch_status": "ok"
+        }
+      ],
+      "attempt_log": [
+        {
+          "id": "a_probe_1",
+          "at": "2026-11-04T12:42:50.072Z",
+          "mode": "probe",
+          "action": "GET https://home.openweathermap.org/",
+          "observed": "HTTP 200 -> https://home.openweathermap.org/users/sign_in",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c32"
+          ]
+        },
+        {
+          "id": "a_probe_2",
+          "at": "2026-11-04T12:42:50.856Z",
+          "mode": "probe",
+          "action": "GET https://openweathermap.org/.well-known/openid-configuration",
+          "observed": "HTTP 404: no discovery document on openweathermap.org",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c33"
+          ]
+        },
+        {
+          "id": "a_probe_3",
+          "at": "2026-11-04T12:42:50.945Z",
+          "mode": "probe",
+          "action": "GET https://openweathermap.org/.well-known/oauth-authorization-server",
+          "observed": "HTTP 404: no discovery document on openweathermap.org",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c34"
+          ]
+        }
+      ],
+      "corrections": [],
+      "belief_diff": [
+        {
+          "topic": "Does letting arbitrary users connect require provider review or verification?",
+          "prior_belief": "No, OpenWeatherMap does not offer an OAuth app-review process because it authenticates requests with a per-account API key rather than user OAuth consent, so any registered developer gets a key immediately.",
+          "finding": "The claims state OpenWeather uses no OAuth, only an API key (APPID), with no app review described, and the OpenID and OAuth discovery endpoints return 404.",
+          "verdict": "confirmed",
+          "claim_ids": [
+            "c1",
+            "c11",
+            "c22",
+            "c33",
+            "c34"
+          ]
+        },
+        {
+          "topic": "Typical approval wait time",
+          "prior_belief": "There is no approval wait; a new API key is typically activated within about 10 minutes of signup, though some keys can take up to 2 hours to become active.",
+          "finding": "The claims say the key is sent by email after sign-up but give no activation timing; the 10-minute figure in the claims refers to the rate-limit retry advice, not key activation, and the 2-hour figure is not addressed.",
+          "verdict": "could_not_verify",
+          "claim_ids": [
+            "c2",
+            "c12",
+            "c19"
+          ]
+        },
+        {
+          "topic": "Limits while the app is unapproved",
+          "prior_belief": "The free tier allows 60 calls per minute and 1,000,000 calls per month, and this applies identically to every new key with no separate unapproved restriction.",
+          "finding": "The claims say limits are account-level, combined across all keys and products, and vary by plan, but give no specific numbers and do not mention an unapproved restriction.",
+          "verdict": "refined",
+          "claim_ids": [
+            "c5",
+            "c13",
+            "c17",
+            "c26"
+          ]
+        },
+        {
+          "topic": "Fees or paid requirements",
+          "prior_belief": "The free plan requires no payment card, and paid subscriptions are optional for higher call volumes or additional endpoints.",
+          "finding": "The claims describe a free plan reached by email sign-up and paid plans that differ in APIs, service level and calls per minute, with paid plans using a different endpoint; no payment card requirement is mentioned either way.",
+          "verdict": "refined",
+          "claim_ids": [
+            "c7",
+            "c12",
+            "c20",
+            "c29"
+          ]
+        },
+        {
+          "topic": "Key prerequisites (domain, privacy policy, video, business verification)",
+          "prior_belief": "No domain, privacy policy, demo video, or business verification is required; an email-verified account is sufficient to generate an API key.",
+          "finding": "The claims say sign-up is by email with no review, domain verification or privacy policy mentioned as a prerequisite; demo video and business verification are not addressed.",
+          "verdict": "refined",
+          "claim_ids": [
+            "c12",
+            "c22",
+            "c24"
+          ]
+        },
+        {
+          "topic": "Redirect URI rules",
+          "prior_belief": "OpenWeatherMap has no redirect URI setting because it issues no OAuth authorization flow, so none needs to be registered or validated.",
+          "finding": "The claims state there is no OAuth at all and no OAuth app registration, which implies no redirect URI flow, though no claim explicitly mentions redirect URIs.",
+          "verdict": "confirmed",
+          "claim_ids": [
+            "c1",
+            "c22"
+          ]
+        }
+      ],
+      "sources_searched": [
+        "https://openweathermap.org/appid",
+        "https://openweathermap.org/appid?collection=other",
+        "https://openweathermap.org/api/weathermaps",
+        "https://michelgss.github.io/openweather-docs/docs/getting-started/get-api-key",
+        "https://dlthub.com/context/source/open-weather"
+      ],
+      "uncertain": [
+        "A suspended account gets an HTTP 429 response."
+      ]
+    }
+  }
+}

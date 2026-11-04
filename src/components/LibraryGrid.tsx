@@ -1,12 +1,12 @@
 import Link from "next/link";
 import type { StoredVersion } from "@/lib/store";
-import { LEVEL_META, approvalText, fmtMinutes } from "@/lib/present";
+import { metaFor, approvalText, fmtMinutes } from "@/lib/present";
 import { AppLogo } from "./AppLogo";
 import { Pip } from "./brand/Mascot";
 
 export function IntegrationCard({ v, featured = false }: { v: StoredVersion; featured?: boolean }) {
   const g = v.guide;
-  const meta = LEVEL_META[g.difficulty.level];
+  const meta = metaFor(g);
   const c = g.provenance.claims;
   const solid = c.filter((x) => x.status === "tested" || x.status === "primary").length;
   return (

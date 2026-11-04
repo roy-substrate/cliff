@@ -41,6 +41,8 @@ export type ServerTools = { search?: { maxUses: number }; fetch?: { maxUses: num
 export interface CallOpts<T> {
   model: ModelKey;
   system: string;
+  /** Extra instructions placed AFTER the cached system block, so calls that share `system` share the cache. */
+  instructions?: string;
   user: string;
   schema: z.ZodType<T>;
   tools?: ServerTools;
@@ -81,7 +83,10 @@ export async function callModel<T>(o: CallOpts<T>): Promise<T> {
         {
           model: MODELS[o.model],
           max_tokens: o.maxTokens ?? 16000,
-          system: [{ type: "text", text: o.system + (constrained ? "" : jsonInstruction()), cache_control: { type: "ephemeral" } }],
+          system: [
+            { type: "text", text: o.system, cache_control: { type: "ephemeral" } },
+            ...(o.instructions || !constrained ? [{ type: "text", text: (o.instructions ?? "") + (constrained ? "" : jsonInstruction()) }] : []),
+          ],
           messages,
           tools: tools.length ? tools : undefined,
           output_config: constrained ? { effort: o.effort ?? "medium", format: zodOutputFormat(o.schema) } : { effort: o.effort ?? "medium" },

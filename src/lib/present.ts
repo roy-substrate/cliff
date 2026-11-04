@@ -13,6 +13,10 @@ export const LEVEL_META: Record<Level, { label: string; blurb: string; bg: strin
   unknown: { label: "Unknown", blurb: "Not enough verified facts", bg: "bg-lilac-soft", chip: "bg-muted text-white", header: "from-[#e6e0fb] via-[#f3f0fe]", mood: "think", ring: "#c9bdf5" },
 };
 
+/** Apps with no third-party OAuth (API keys, personal tokens) are easy, not "unknown". */
+export const NO_OAUTH_META: (typeof LEVEL_META)[Level] = { label: "No OAuth app", blurb: "Uses an API key or token instead", bg: "bg-mint-soft", chip: "bg-green text-white", header: "from-[#d9f6e4] via-[#eefbf3]", mood: "celebrate", ring: "#7fdcab" };
+export const metaFor = (g: Pick<Guide, "has_oauth" | "difficulty" | "status">) => (g.status !== "fallback" && !g.has_oauth ? NO_OAUTH_META : LEVEL_META[g.difficulty.level]);
+
 export function fmtMinutes(m: number): string {
   if (!m) return "Unknown";
   if (m < 60) return `${m} min`;

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Claim, Guide } from "@/lib/schema";
 import { STATUS_STYLE } from "@/lib/status";
-import { LEVEL_META, approvalText, fmtMinutes } from "@/lib/present";
+import { metaFor, approvalText, fmtMinutes } from "@/lib/present";
 import { ClaimChips, type ClaimBundle } from "./ClaimChips";
 import { CliffCalculator } from "./CliffCalculator";
 import { Artifacts } from "./Artifacts";
@@ -36,7 +36,7 @@ export function GuideView({ guide, versionId, createdAt, latest }: { guide: Guid
 
   const count = (s: Claim["status"]) => claims.filter((c) => c.status === s).length;
   const fallback = guide.status === "fallback";
-  const meta = LEVEL_META[guide.difficulty.level];
+  const meta = metaFor(guide);
   const mine = guide.steps.filter((s) => s.actor === "developer").length;
   const pips = guide.steps.filter((s) => s.actor === "agent").length;
   const bob = guide.build_or_borrow;
@@ -71,9 +71,9 @@ export function GuideView({ guide, versionId, createdAt, latest }: { guide: Guid
             <div className="text-xs font-bold uppercase tracking-wide text-muted">Setup difficulty</div>
             <div className="mt-1 flex items-center gap-2">
               <span className={`rounded-full px-3 py-1 font-display text-lg font-bold ${meta.chip}`}>{meta.label}</span>
-              {!fallback && guide.difficulty.level !== "unknown" && <span className="font-display text-lg font-bold text-ink/50">{guide.difficulty.score}/10</span>}
+              {!fallback && guide.has_oauth && guide.difficulty.level !== "unknown" && <span className="font-display text-lg font-bold text-ink/50">{guide.difficulty.score}/10</span>}
             </div>
-            <div className="mt-1 text-xs text-muted">{fallback ? "Not enough verified facts to score" : "Computed from the facts below, not guessed"}</div>
+            <div className="mt-1 text-xs text-muted">{fallback ? "Not enough verified facts to score" : !guide.has_oauth ? "No provider review to pass: there is no OAuth app to register" : "Computed from the facts below, not guessed"}</div>
           </div>
           <div className="rounded-[26px] bg-white p-4 shadow-soft">
             <div className="text-xs font-bold uppercase tracking-wide text-muted">Your hands-on effort</div>

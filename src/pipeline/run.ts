@@ -76,7 +76,7 @@ export async function generateGuide(input: string, emit: Emit, opts: RunOpts = {
   const homepage = resolved?.homepage ?? (input.startsWith("http") ? input : `https://${guess}.com`);
 
   const [composio, priorRes] = await Promise.all([
-    lookupComposio(slug),
+    lookupComposio(slug, name),
     timed("resolve", () => within(DEADLINE.resolve, opts.signal, (s) => S.priorBeliefs(name, meter, s)), "prior beliefs"),
   ]);
   const priors = priorRes?.priors ?? [];

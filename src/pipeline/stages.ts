@@ -70,9 +70,9 @@ export const discover = (r: { name: string; homepage: string }, meter: CostMeter
     meter,
     signal,
     onToolEvent: onTool,
-    tools: { search: { maxUses: 4 } },
+    tools: { search: { maxUses: 3 } },
     maxTokens: 4000,
-    system: `You are a research librarian finding the best sources for creating and getting approval for an OAuth app with a provider. Use web_search (max 4 queries) such as: "<name> OAuth 2.0 developer docs", "<name> create OAuth app client id", "<name> app review verification scopes", "<name> API rate limits unverified app". Return 5-10 URLs you actually saw in results. Prefer first-party developer docs (first_party=true). Include at most 2 community/blog pages. Give each a role. Set authorize_url only if a doc shows the exact OAuth authorize endpoint. ${UNTRUSTED}`,
+    system: `You are a research librarian finding the best sources for creating and getting approval for an OAuth app with a provider. Use web_search (max 3 queries) such as: "<name> OAuth 2.0 developer docs", "<name> create OAuth app client id", "<name> app review verification scopes", "<name> API rate limits unverified app". Return 5-10 URLs you actually saw in results. Prefer first-party developer docs (first_party=true). Include at most 2 community/blog pages. Give each a role. Set authorize_url only if a doc shows the exact OAuth authorize endpoint. ${UNTRUSTED}`,
     user: `Provider: ${r.name} (${r.homepage})`,
   });
 
@@ -112,7 +112,7 @@ export const extract = (
     meter,
     signal,
     onToolEvent: onTool,
-    tools: { fetch: { maxUses: 3, maxContentTokens: 12000 } },
+    tools: { fetch: { maxUses: 3, maxContentTokens: 9000 } },
     maxTokens: 8000,
     system: `You extract facts about ${WORKERS[worker]} for a provider's OAuth app setup. Use web_fetch on the given URLs (most relevant first, at most 3). Each claim must be one atomic, specific statement with a VERBATIM quote copied exactly from the fetched page (under 300 chars). If the page does not state something, do NOT make up a quote: either omit the claim or return it with an empty quote. Never invent endpoint paths, numbers or durations. Record any date shown on the page in date_in_source. Return 6-14 claims. ${UNTRUSTED}`,
     user: `Provider: ${r.name}\nSources:\n${sources.map((s) => `- [${s.role}] ${s.url}`).join("\n")}`,
@@ -150,12 +150,15 @@ export async function synthesize(
   meter: CostMeter,
   signal?: AbortSignal,
 ): Promise<GuideDraft> {
-  const user = JSON.stringify(input);
-  const base = { model: "opus" as const, effort: "medium" as const, meter, signal, user, maxTokens: 16000 };
+  // The shared rules + the (large) input go in the cached system block; only the per-part instructions differ,
+  // so the second and third calls read the input from cache instead of paying for it again.
+  const shared = `${SYNTH_RULES}\n\nINPUT (claims, probes, Composio info):\n${JSON.stringify(input)}`;
+  const base = { model: "opus" as const, effort: "medium" as const, meter, signal, system: shared, user: "Produce your part now, as JSON.", maxTokens: 16000 };
+  const part = (k: keyof typeof PART_RULES) => PART_RULES[k].slice(SYNTH_RULES.length).trim();
   const [core, cliff, steps] = await Promise.all([
-    callModel({ ...base, schema: DraftCore, system: PART_RULES.core }),
-    callModel({ ...base, schema: DraftCliff, system: PART_RULES.cliff }),
-    callModel({ ...base, schema: DraftSteps, system: PART_RULES.steps }),
+    callModel({ ...base, schema: DraftCore, instructions: part("core") }),
+    callModel({ ...base, schema: DraftCliff, instructions: part("cliff") }),
+    callModel({ ...base, schema: DraftSteps, instructions: part("steps") }),
   ]);
   return { ...core, ...cliff, ...steps };
 }
