@@ -29,7 +29,8 @@ export const Evidence = z.object({
   quote: z.string(),
   fetched_at: z.string(),
   kind: z.enum(["doc", "console_probe", "well_known", "screenshot", "attempt_log"]),
-  quote_found: z.boolean().nullable(), // set by verifier; null = not checked
+  quote_found: z.boolean().nullable(), // exact-enough match (>=85% of the quote) on the cited page; null = not checked
+  coverage: z.number().nullable(), // fraction of the quote found on the cited page; null = not checked
   fetch_status: z.enum(["ok", "unreachable", "not_checked"]),
 });
 export type Evidence = z.infer<typeof Evidence>;
@@ -78,6 +79,7 @@ export const PathNode = z.object({
   est_minutes: z.number(),
   wait_days_min: z.number(),
   wait_days_max: z.number(),
+  wait_unknown: z.boolean(), // the provider owns the clock but no source states how long
   depends_on: z.array(z.string()),
   claim_ids: z.array(z.string()),
 });
@@ -223,14 +225,32 @@ export const Guide = z.object({
 });
 export type Guide = z.infer<typeof Guide>;
 
-/** What the synthesizer (Opus) returns. Provenance is assembled by code, not the model. */
-export const GuideDraft = Guide.omit({ provenance: true, difficulty: true, composio: true, status: true }).extend({
+/**
+ * What the synthesizer (Opus) returns, in three smaller calls: the full guide schema is too large for the
+ * API's structured-output grammar. Provenance, difficulty and Composio info are assembled by code, not the model.
+ */
+export const DraftCore = Guide.pick({
+  app: true,
+  summary: true,
+  has_oauth: true,
+  auth_alternatives: true,
+  build_or_borrow: true,
+  time: true,
+  prerequisites: true,
+  oauth: true,
+  blockers: true,
+  app_specific_gotchas: true,
+  agent_vs_human: true,
+  artifacts: true,
+}).extend({
   difficulty_drivers: z.array(z.string()),
   business_verification_required: z.boolean(),
   paid_plan_or_fee_required: z.boolean(),
   long_wait_days: z.number(), // longest single provider wait, days
 });
-export type GuideDraft = z.infer<typeof GuideDraft>;
+export const DraftCliff = Guide.pick({ cliff: true });
+export const DraftSteps = Guide.pick({ steps: true });
+export type GuideDraft = z.infer<typeof DraftCore> & z.infer<typeof DraftCliff> & z.infer<typeof DraftSteps>;
 
 /** Stream events. The UI renders these; they are also persisted for replay. */
 export type Stage = "resolve" | "discover" | "extract" | "probe" | "synthesize" | "verify" | "publish";

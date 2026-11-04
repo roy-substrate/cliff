@@ -1,0 +1,278 @@
+{
+  "versionId": "notion-202611041143-7u58",
+  "slug": "notion",
+  "created_at": "2026-11-04T11:43:40.242Z",
+  "created_by": "library",
+  "cost_usd": 0.1349625,
+  "guide": {
+    "app": {
+      "name": "Notion",
+      "slug": "notion",
+      "homepage": "https://www.notion.so",
+      "developer_portal": null
+    },
+    "summary": "We could not find enough reliable sources to write a verified guide for Notion. Below is a generic OAuth 2.0 checklist. Every statement is unverified. Paste the provider's developer docs URL to retry.",
+    "has_oauth": true,
+    "auth_alternatives": [],
+    "build_or_borrow": {
+      "composio_managed": true,
+      "composio_slug": "notion",
+      "reasons_to_bring_own": [],
+      "agent_access_allowed": "unknown",
+      "verdict": "Composio lists managed auth for this toolkit, so try that before creating your own app. We could not verify anything else."
+    },
+    "time": {
+      "hands_on_minutes": 0,
+      "approval_required": false,
+      "approval_wait_days_min": null,
+      "approval_wait_days_max": null,
+      "unapproved_usable": true,
+      "claim_ids": []
+    },
+    "cliff": {
+      "scope_tiers": [],
+      "paths": [],
+      "unapproved_mode": {
+        "limits": [],
+        "breaks_at": "Unknown",
+        "claim_ids": []
+      }
+    },
+    "prerequisites": [],
+    "oauth": {
+      "flow": "unknown",
+      "authorize_url": null,
+      "token_url": null,
+      "pkce": "unknown",
+      "refresh_tokens": "unknown",
+      "token_lifetime": null,
+      "redirect_uri_rules": [],
+      "claim_ids": []
+    },
+    "steps": [
+      {
+        "n": 1,
+        "title": "Find the provider's developer portal and sign in",
+        "detail_md": "Generic step. Not verified for this provider.",
+        "actor": "developer",
+        "claim_ids": [],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 2,
+        "title": "Create a new app or integration",
+        "detail_md": "Generic step. Not verified for this provider.",
+        "actor": "developer",
+        "claim_ids": [],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 3,
+        "title": "Add the redirect URI your auth config expects, exactly as shown",
+        "detail_md": "Generic step. Not verified for this provider.",
+        "actor": "developer",
+        "claim_ids": [],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 4,
+        "title": "Choose the smallest set of scopes your agent needs",
+        "detail_md": "Generic step. Not verified for this provider.",
+        "actor": "developer",
+        "claim_ids": [],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      },
+      {
+        "n": 5,
+        "title": "Check whether the provider requires review before other users can connect",
+        "detail_md": "Generic step. Not verified for this provider.",
+        "actor": "developer",
+        "claim_ids": [],
+        "attempt_log_ids": [],
+        "est_minutes": 10
+      }
+    ],
+    "blockers": [],
+    "app_specific_gotchas": [],
+    "agent_vs_human": {
+      "agent_can": [],
+      "human_must": [
+        "Everything: we could not verify this provider's process."
+      ]
+    },
+    "artifacts": [],
+    "status": "fallback",
+    "difficulty": {
+      "drivers": [
+        "No reliable sources found"
+      ],
+      "score": 0,
+      "level": "unknown"
+    },
+    "composio": {
+      "toolkit_slug": "notion",
+      "tool_count": null,
+      "managed_auth": true,
+      "auth_config_fields": [],
+      "redirect_uri": null
+    },
+    "provenance": {
+      "claims": [
+        {
+          "id": "c1",
+          "text": "Probe: GET https://www.notion.so/my-integrations returned HTTP 200 -> https://www.notion.so/developers/connections",
+          "evidence_ids": [
+            "e1"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c2",
+          "text": "Probe: GET https://www.notion.so/.well-known/openid-configuration returned HTTP 404: no discovery document on notion.so",
+          "evidence_ids": [
+            "e2"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        },
+        {
+          "id": "c3",
+          "text": "Probe: GET https://www.notion.so/.well-known/oauth-authorization-server returned HTTP 404: no discovery document on notion.so",
+          "evidence_ids": [
+            "e3"
+          ],
+          "status": "tested",
+          "confidence": 0.95,
+          "topic": "endpoint",
+          "last_seen_date": "2026-11-04",
+          "stale": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "url": "https://www.notion.so/my-integrations",
+          "quote": "HTTP 200 -> https://www.notion.so/developers/connections",
+          "fetched_at": "2026-11-04T11:43:15.785Z",
+          "kind": "console_probe",
+          "quote_found": true,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e2",
+          "url": "https://www.notion.so/.well-known/openid-configuration",
+          "quote": "HTTP 404: no discovery document on notion.so",
+          "fetched_at": "2026-11-04T11:43:16.120Z",
+          "kind": "well_known",
+          "quote_found": true,
+          "fetch_status": "ok"
+        },
+        {
+          "id": "e3",
+          "url": "https://www.notion.so/.well-known/oauth-authorization-server",
+          "quote": "HTTP 404: no discovery document on notion.so",
+          "fetched_at": "2026-11-04T11:43:16.391Z",
+          "kind": "well_known",
+          "quote_found": true,
+          "fetch_status": "ok"
+        }
+      ],
+      "attempt_log": [
+        {
+          "id": "a_probe_1",
+          "at": "2026-11-04T11:43:15.785Z",
+          "mode": "probe",
+          "action": "GET https://www.notion.so/my-integrations",
+          "observed": "HTTP 200 -> https://www.notion.so/developers/connections",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c1"
+          ]
+        },
+        {
+          "id": "a_probe_2",
+          "at": "2026-11-04T11:43:16.120Z",
+          "mode": "probe",
+          "action": "GET https://www.notion.so/.well-known/openid-configuration",
+          "observed": "HTTP 404: no discovery document on notion.so",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c2"
+          ]
+        },
+        {
+          "id": "a_probe_3",
+          "at": "2026-11-04T11:43:16.391Z",
+          "mode": "probe",
+          "action": "GET https://www.notion.so/.well-known/oauth-authorization-server",
+          "observed": "HTTP 404: no discovery document on notion.so",
+          "outcome": "ok",
+          "screenshot": null,
+          "supports_claim_ids": [
+            "c3"
+          ]
+        }
+      ],
+      "corrections": [],
+      "belief_diff": [
+        {
+          "topic": "Does letting arbitrary users connect require provider review or verification?",
+          "prior_belief": "Yes, Notion requires a public integration to go through its review and approval process before arbitrary workspaces can install it.",
+          "finding": "The claims only record HTTP probes of notion.so endpoints and do not address whether public integrations require review or approval.",
+          "verdict": "could_not_verify",
+          "claim_ids": []
+        },
+        {
+          "topic": "Typical approval wait time",
+          "prior_belief": "Notion's public integration review typically takes about 5 business days.",
+          "finding": "The claims do not mention any review or approval timeline.",
+          "verdict": "could_not_verify",
+          "claim_ids": []
+        },
+        {
+          "topic": "Limits while the app is unapproved",
+          "prior_belief": "While unapproved, a public integration can only be installed by workspaces that are owned by the integration's creator, capped at 1 workspace besides the creator's own.",
+          "finding": "The claims do not describe installation limits for unapproved public integrations.",
+          "verdict": "could_not_verify",
+          "claim_ids": []
+        },
+        {
+          "topic": "Fees or paid requirements",
+          "prior_belief": "Creating and publishing a Notion integration is free with no paid requirement.",
+          "finding": "The claims do not address pricing or whether creating or publishing an integration costs money.",
+          "verdict": "could_not_verify",
+          "claim_ids": []
+        },
+        {
+          "topic": "Key prerequisites (domain, privacy policy, video, business verification)",
+          "prior_belief": "Public submission requires a privacy policy URL, a company website, and a demo video, but no business verification or domain verification.",
+          "finding": "The claims do not list submission requirements such as privacy policy, website, demo video, or verification steps.",
+          "verdict": "could_not_verify",
+          "claim_ids": []
+        },
+        {
+          "topic": "Redirect URI rules",
+          "prior_belief": "Redirect URIs must be HTTPS URLs registered exactly in the integration settings, with localhost HTTP allowed only for development.",
+          "finding": "The claims do not describe redirect URI rules; the probes only show the integrations page returns 200 and the OAuth/OpenID discovery documents return 404.",
+          "verdict": "could_not_verify",
+          "claim_ids": []
+        }
+      ],
+      "sources_searched": [],
+      "uncertain": []
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import type { z } from "zod";
+import { z } from "zod";
 
 export const MODELS = {
   opus: "claude-opus-5-5",
@@ -54,32 +54,50 @@ export interface CallOpts<T> {
 /** One structured-output call, looping on pause_turn when server tools run long. */
 export async function callModel<T>(o: CallOpts<T>): Promise<T> {
   const tools: Anthropic.Beta.BetaToolUnion[] = [];
-  if (o.tools?.search) tools.push({ type: "web_search_20260209", name: "web_search", max_uses: o.tools.search.maxUses });
+  // Deliberately the BASIC tool variants. The *_20260209 "dynamic filtering" variants run model-written code in a hidden
+  // sandbox; in testing that code printed nothing back, the model never saw the results, returned an empty source list
+  // and filled gaps from memory. The basic variants put results straight into context.
+  if (o.tools?.search) tools.push({ type: "web_search_20250305", name: "web_search", max_uses: o.tools.search.maxUses });
   if (o.tools?.fetch)
     tools.push({
-      type: "web_fetch_20260209",
+      type: "web_fetch_20250910",
       name: "web_fetch",
       max_uses: o.tools.fetch.maxUses,
       max_content_tokens: o.tools.fetch.maxContentTokens ?? 12000,
     });
 
   const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: "user", content: o.user }];
+  // Constrained decoding is preferred. If the schema is too large for the API's grammar compiler, fall back to
+  // asking for plain JSON and validating it with zod (one repair attempt).
+  let constrained = true;
+  let repaired = false;
+  const jsonInstruction = () =>
+    `\n\nRespond with ONLY one JSON object, no prose and no code fences, that matches this JSON Schema:\n${JSON.stringify(z.toJSONSchema(o.schema))}`;
 
-  for (let turn = 0; turn < 5; turn++) {
-    const stream = getClient().beta.messages.stream(
-      {
-        model: MODELS[o.model],
-        max_tokens: o.maxTokens ?? 16000,
-        system: [{ type: "text", text: o.system, cache_control: { type: "ephemeral" } }],
-        messages,
-        tools: tools.length ? tools : undefined,
-        output_config: { effort: o.effort ?? "medium", format: zodOutputFormat(o.schema) },
-        betas: ["server-side-fallback-2026-07-01"],
-        fallbacks: "default",
-      } as unknown as Anthropic.Beta.Messages.MessageCreateParams,
-      { signal: o.signal },
-    );
-    const msg = await stream.finalMessage();
+  for (let turn = 0; turn < 6; turn++) {
+    let msg: Awaited<ReturnType<ReturnType<ReturnType<typeof getClient>["beta"]["messages"]["stream"]>["finalMessage"]>>;
+    try {
+      const stream = getClient().beta.messages.stream(
+        {
+          model: MODELS[o.model],
+          max_tokens: o.maxTokens ?? 16000,
+          system: [{ type: "text", text: o.system + (constrained ? "" : jsonInstruction()), cache_control: { type: "ephemeral" } }],
+          messages,
+          tools: tools.length ? tools : undefined,
+          output_config: constrained ? { effort: o.effort ?? "medium", format: zodOutputFormat(o.schema) } : { effort: o.effort ?? "medium" },
+          betas: ["server-side-fallback-2026-07-01"],
+          fallbacks: "default",
+        } as unknown as Anthropic.Beta.Messages.MessageCreateParams,
+        { signal: o.signal },
+      );
+      msg = await stream.finalMessage();
+    } catch (e) {
+      if (constrained && e instanceof Anthropic.BadRequestError && /grammar is too large/i.test(e.message)) {
+        constrained = false;
+        continue;
+      }
+      throw e;
+    }
     o.meter?.add(o.model, msg.usage as never);
     emitToolEvents(msg.content, o.onToolEvent);
 
@@ -98,7 +116,15 @@ export async function callModel<T>(o: CallOpts<T>): Promise<T> {
       }
     }
     if (!text) throw new Error("no text block in response");
-    return o.schema.parse(JSON.parse(text));
+    const json = constrained ? text : text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1);
+    try {
+      return o.schema.parse(JSON.parse(json));
+    } catch (err) {
+      if (constrained || repaired) throw err;
+      repaired = true;
+      messages.push({ role: "assistant", content: text }, { role: "user", content: `That did not validate: ${String(err).slice(0, 1500)}. Return the corrected JSON object only.` });
+      continue;
+    }
   }
   throw new Error("too many pause_turn continuations");
 }

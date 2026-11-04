@@ -60,8 +60,8 @@ export async function generateGuide(input: string, emit: Emit, opts: RunOpts = {
       "Find the provider's official developer docs, review policy and limits",
       "Extract claims with verbatim quotes, in parallel: mechanics, approval, console",
       "Probe the provider's public endpoints without logging in",
-      "Synthesize the guide from claims only",
-      "Re-fetch every cited page and verify each quote",
+      "Re-fetch every cited page and check each quote; drop what fails",
+      "Write the guide from verified claims only",
     ],
   });
 
@@ -97,7 +97,7 @@ export async function generateGuide(input: string, emit: Emit, opts: RunOpts = {
     for (const c of raw.claims) {
       const hasQuote = c.quote.trim().length > 15;
       const evId = `e${evidence.length + 1}`;
-      if (hasQuote) evidence.push({ id: evId, url: c.source_url, quote: c.quote.trim(), fetched_at: nowIso(), kind: "doc", quote_found: null, fetch_status: "not_checked" });
+      if (hasQuote) evidence.push({ id: evId, url: c.source_url, quote: c.quote.trim(), fetched_at: nowIso(), kind: "doc", quote_found: null, coverage: null, fetch_status: "not_checked" });
       const firstParty = firstPartyRoots.has(rootDomain(c.source_url));
       const claim: Claim = {
         id: `c${claims.length + 1}`,
@@ -144,61 +144,60 @@ export async function generateGuide(input: string, emit: Emit, opts: RunOpts = {
     if (a.outcome === "error") continue;
     const evId = `e${evidence.length + 1}`;
     const url = a.action.replace(/^GET /, "").split("?")[0];
-    evidence.push({ id: evId, url, quote: a.observed.slice(0, 400), fetched_at: a.at, kind: a.action.includes("well-known") ? "well_known" : "console_probe", quote_found: true, fetch_status: "ok" });
+    evidence.push({ id: evId, url, quote: a.observed.slice(0, 400), fetched_at: a.at, kind: a.action.includes("well-known") ? "well_known" : "console_probe", quote_found: true, coverage: 1, fetch_status: "ok" });
     const claim: Claim = { id: `c${claims.length + 1}`, text: `Probe: ${a.action} returned ${a.observed.slice(0, 200)}`, evidence_ids: [evId], status: "tested", confidence: 0.95, topic: "endpoint", last_seen_date: a.at.slice(0, 10), stale: false };
     a.supports_claim_ids = [claim.id];
     claims.push(claim);
     emit({ type: "claim", claim });
   }
 
+  // ---- S5 verify FIRST. Nothing that failed verification may reach the writer.
+  let corrections: Correction[] = [];
+  const emitFix = (c: Correction) => emit({ type: "verify", claimId: c.claim_id, from: c.from, to: c.to, reason: c.reason });
+  const isTrusted = (c: Claim) => c.status === "tested" || c.status === "primary" || c.status === "secondary";
+  await timed("verify", async () => {
+    corrections = await verifyEvidence(claims, evidence, emitFix, sources.map((x) => x.url));
+    const conflicts = await within(DEADLINE.verify, opts.signal, (sig) =>
+      S.findContradictions(claims.filter(isTrusted).map((c) => ({ id: c.id, text: c.text, topic: c.topic, status: c.status })), meter, sig),
+    ).catch(() => ({ conflicts: [] }));
+    for (const cf of conflicts.conflicts) corrections.push(...resolveConflict(cf.claim_ids, cf.reason, claims, evidence, emitFix));
+  });
+
   // ---- no-source fallback: never fabricate
-  const enough = sources.length >= 2 && claims.filter((c) => c.status !== "tested").length >= 3;
+  const trusted = claims.filter(isTrusted);
+  const enough = sources.length >= 2 && trusted.filter((c) => c.status !== "tested").length >= 3;
   let draft: GuideDraft | null = null;
   if (enough) {
     draft = await timed("synthesize", () =>
-      within(DEADLINE.synthesize, opts.signal, (s) =>
+      within(DEADLINE.synthesize, opts.signal, (sig) =>
         S.synthesize(
           {
             app: { name, slug, homepage },
-            claims: claims.map((c) => ({ id: c.id, text: c.text, topic: c.topic, status: c.status })),
+            // only claims that survived verification are facts the writer may use
+            claims: trusted.map((c) => ({ id: c.id, text: c.text, topic: c.topic, status: c.status })),
             probes: attempts.map((a) => `${a.action} -> ${a.observed}`),
             composio,
           },
           meter,
-          s,
+          sig,
         ),
       ),
     );
   } else {
-    emit({ type: "stage", stage: "synthesize", status: "skipped", note: "not enough sources; emitting an honest fallback guide" });
+    emit({ type: "stage", stage: "synthesize", status: "skipped", note: "not enough verified sources; emitting an honest fallback guide" });
   }
-  const valid = new Set(claims.map((c) => c.id));
+  const valid = new Set(trusted.map((c) => c.id));
   const isFallback = !draft;
   const finalDraft = draft ? scrubClaimIds(draft, valid) : fallbackDraft(name, slug, homepage, composio.managed_auth);
-
-  // ---- S5 verify
-  let corrections: Correction[] = [];
-  await timed("verify", async () => {
-    corrections = await verifyEvidence(claims, evidence, (c) => emit({ type: "verify", claimId: c.claim_id, from: c.from, to: c.to, reason: c.reason }));
-    const conflicts = await within(DEADLINE.verify, opts.signal, (s) =>
-      S.findContradictions(claims.filter((c) => c.status !== "tested").map((c) => ({ id: c.id, text: c.text, topic: c.topic })), meter, s),
-    ).catch(() => ({ conflicts: [] }));
-    for (const cf of conflicts.conflicts) {
-      for (const id of cf.claim_ids) {
-        const c = claims.find((x) => x.id === id);
-        if (c && c.status !== "tested") {
-          const corr = { claim_id: id, from: c.status, to: "unverified" as const, reason: `conflicts with another source: ${cf.reason}` };
-          c.status = "unverified";
-          corrections.push(corr);
-          emit({ type: "verify", claimId: id, from: corr.from, to: corr.to, reason: corr.reason });
-        }
-      }
-    }
-  });
+  if (draft) {
+    // hands-on time is computed from the steps, never guessed: the developer's own non-optional work
+    const mine = finalDraft.steps.filter((st) => st.actor === "developer" && !/^optional/i.test(st.title)).reduce((n, st) => n + st.est_minutes, 0);
+    if (mine > 0) finalDraft.time.hands_on_minutes = mine;
+  }
 
   const diffRes = priors.length
-    ? await within(DEADLINE.verify, opts.signal, (s) =>
-        S.beliefDiff(priors, claims.map((c) => ({ id: c.id, text: c.text, status: c.status, topic: c.topic })), meter, s),
+    ? await within(DEADLINE.verify, opts.signal, (sig) =>
+        S.beliefDiff(priors, trusted.map((c) => ({ id: c.id, text: c.text, status: c.status, topic: c.topic })), meter, sig),
       ).catch(() => null)
     : null;
 
@@ -274,4 +273,29 @@ function fallbackDraft(name: string, slug: string, homepage: string, composioMan
     paid_plan_or_fee_required: false,
     long_wait_days: 0,
   };
+}
+
+
+/** How much a claim's support is worth when two claims disagree. */
+function strength(c: Claim, evidence: Evidence[]): number {
+  if (c.status === "tested") return 4;
+  if (c.status === "secondary") return 1;
+  const best = Math.max(0, ...c.evidence_ids.map((id) => evidence.find((e) => e.id === id)?.coverage ?? 0));
+  return best >= 0.85 ? 3 : 2;
+}
+
+/** A conflict demotes only the weaker side. If both are equally supported it is a real dispute: demote both. */
+function resolveConflict(ids: string[], reason: string, claims: Claim[], evidence: Evidence[], emit: (c: Correction) => void): Correction[] {
+  const members = ids.map((id) => claims.find((c) => c.id === id)).filter((c): c is Claim => !!c && (c.status === "tested" || c.status === "primary" || c.status === "secondary"));
+  if (members.length < 2) return [];
+  const max = Math.max(...members.map((c) => strength(c, evidence)));
+  const losers = members.filter((c) => strength(c, evidence) < max);
+  const demote = losers.length ? losers : members;
+  const why = losers.length ? `conflicts with a better-supported claim: ${reason}` : `sources disagree and neither is better supported: ${reason}`;
+  return demote.map((c) => {
+    const corr = { claim_id: c.id, from: c.status, to: "unverified" as const, reason: why };
+    c.status = "unverified";
+    emit(corr);
+    return corr;
+  });
 }

@@ -27,8 +27,16 @@ export function rootDomain(urlOrHost: string): string {
   return sld;
 }
 
-export function normalizeText(s: string): string {
+/** The fetch tool returns markdown; re-fetched pages are plain text. Compare both with markup removed. */
+export function stripMarkdown(s: string): string {
   return s
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/[*`#>]+/g, " ");
+}
+
+export function normalizeText(s: string): string {
+  return stripMarkdown(s)
     .toLowerCase()
     .replace(/[‘’“”]/g, "'")
     .replace(/[‐-―−]/g, "-")

@@ -73,6 +73,7 @@ export function CliffCalculator({ guide, bundles }: { guide: Guide; bundles: Rec
           {!r.missingPath && (
             <p className="mt-1 text-sm text-muted">
               Time to strangers connecting: <b className="text-fg">{fmtDays(r.totalMin)}</b> to <b className="text-fg">{fmtDays(r.totalMax)}</b>
+              {r.unknownWait && <b className="text-accent"> plus a provider review with no documented duration</b>}
               {r.gates.length > 0 && <> · triggered by {r.gates.join(", ")}</>}
             </p>
           )}
@@ -92,7 +93,7 @@ export function CliffCalculator({ guide, bundles }: { guide: Guide; bundles: Rec
             <ol className="space-y-1.5">
               {r.schedule.map((n) => {
                 const left = (n.startMax / scale) * 100;
-                const width = Math.max(((n.finishMax - n.startMax) / scale) * 100, 1.5);
+                const width = Math.max(((n.finishMax - n.startMax) / scale) * 100, n.wait_unknown ? 12 : 1.5);
                 const wait = n.actor === "provider_wait";
                 return (
                   <li key={n.id} className="grid grid-cols-[170px_1fr] items-center gap-3 text-xs">
@@ -100,6 +101,7 @@ export function CliffCalculator({ guide, bundles }: { guide: Guide; bundles: Rec
                       {n.title}
                     </span>
                     <span className="relative block h-4 rounded bg-stone-100">
+                      {n.wait_unknown && <span className="absolute right-1 top-0 text-[11px] font-bold leading-4 text-accent">? duration unknown</span>}
                       <span
                         className={`absolute top-0 h-4 rounded ${wait ? "bg-[repeating-linear-gradient(45deg,#c2410c,#c2410c_4px,#e2a07a_4px,#e2a07a_8px)]" : n.actor === "agent" ? "bg-emerald-600" : "bg-stone-700"} ${n.critical ? "" : "opacity-60"}`}
                         style={{ left: `${left}%`, width: `${width}%` }}

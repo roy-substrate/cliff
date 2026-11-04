@@ -46,6 +46,7 @@ export interface CliffResult {
   schedule: ScheduledNode[];
   totalMin: number;
   totalMax: number;
+  unknownWait: boolean; // a provider-owned wait on this path has no documented duration
   missingPath: boolean;
 }
 
@@ -103,7 +104,7 @@ export function computeCliff(guide: Guide, inp: CalcInputs): CliffResult {
   const path = guide.cliff.paths.find((p) => p.distribution === inp.distribution);
   const allGates = [...new Set(tiers.filter((s) => TIER_RANK[s.tier] >= 3 && s.gate).map((s) => s.gate))];
   const publicAudience = inp.distribution !== "internal";
-  const tripped = publicAudience && (rank >= 3 || path?.nodes.some((n) => n.actor === "provider_wait" && n.wait_days_max > 0) === true);
+  const tripped = publicAudience && (rank >= 3 || path?.nodes.some((n) => n.actor === "provider_wait" && (n.wait_days_max > 0 || n.wait_unknown === true)) === true);
 
   // gates and swap suggestions only matter once the cliff is actually tripped for this audience
   const gates = tripped ? allGates : [];
@@ -112,7 +113,7 @@ export function computeCliff(guide: Guide, inp: CalcInputs): CliffResult {
     : [];
 
   if (!path) {
-    return { topTier, tripped, gates, savings, verdict: "This guide has no documented path for that distribution mode.", schedule: [], totalMin: 0, totalMax: 0, missingPath: true };
+    return { topTier, tripped, gates, savings, verdict: "This guide has no documented path for that distribution mode.", schedule: [], totalMin: 0, totalMax: 0, unknownWait: false, missingPath: true };
   }
   const sched = schedule(path.nodes);
   return {
@@ -124,6 +125,7 @@ export function computeCliff(guide: Guide, inp: CalcInputs): CliffResult {
     schedule: sched.nodes,
     totalMin: sched.totalMin,
     totalMax: sched.totalMax,
+    unknownWait: path.nodes.some((n) => n.wait_unknown === true),
     missingPath: false,
   };
 }

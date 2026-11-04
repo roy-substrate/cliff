@@ -10,8 +10,8 @@ const STAGES: { id: Stage; name: string; role: string }[] = [
   { id: "discover", name: "Librarian", role: "Find the official docs, review policy and limits" },
   { id: "extract", name: "Extractors x3", role: "Pull claims with verbatim quotes: mechanics, approval, console" },
   { id: "probe", name: "Prober", role: "Hit public endpoints without logging in" },
-  { id: "synthesize", name: "Writer", role: "Write the guide from claims only" },
-  { id: "verify", name: "Verifier", role: "Re-fetch every cited page and check each quote" },
+  { id: "verify", name: "Verifier", role: "Re-fetch every cited page, check each quote, drop what fails" },
+  { id: "synthesize", name: "Writer", role: "Write the guide from verified claims only" },
 ];
 
 /** Provider/API errors arrive as raw JSON; show the human part. */

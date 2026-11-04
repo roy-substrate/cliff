@@ -56,7 +56,8 @@ function Chip({ claim, evidence }: ClaimBundle) {
               <span className="block text-[11px] text-muted">
                 fetched {e.fetched_at.slice(0, 10)}
                 {e.quote_found === true && " · quote re-found on page"}
-                {e.quote_found === false && " · quote NOT found on re-fetch"}
+                {e.quote_found === false && (e.coverage ?? 0) >= 0.5 && ` · same fact, different wording (${Math.round((e.coverage ?? 0) * 100)}% match)`}
+                {e.quote_found === false && (e.coverage ?? 0) < 0.5 && " · quote NOT found on re-fetch"}
                 {e.fetch_status === "unreachable" && " · page not re-checkable"}
               </span>
             </span>

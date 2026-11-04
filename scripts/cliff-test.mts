@@ -1,5 +1,5 @@
 import { schedule, fmtDays } from "../src/lib/cliff";
-const n = (id: string, est: number, wmin: number, wmax: number, deps: string[] = []) => ({ id, title: id, actor: "developer" as const, est_minutes: est, wait_days_min: wmin, wait_days_max: wmax, depends_on: deps, claim_ids: [] });
+const n = (id: string, est: number, wmin: number, wmax: number, deps: string[] = []) => ({ id, title: id, actor: "developer" as const, est_minutes: est, wait_days_min: wmin, wait_days_max: wmax, wait_unknown: false, depends_on: deps, claim_ids: [] });
 const s = schedule([
   n("register", 60, 0, 0),
   n("privacy", 240, 0, 0, ["register"]),

@@ -54,7 +54,7 @@ for (const id of claimIds) {
     process.exit(1);
   }
   const evId = `e_console_${n}_${id}`;
-  guide.provenance.evidence.push({ id: evId, url: shotUrl ?? action, quote: observed.slice(0, 400), fetched_at: now, kind: shotUrl ? "screenshot" : "attempt_log", quote_found: true, fetch_status: "ok" });
+  guide.provenance.evidence.push({ id: evId, url: shotUrl ?? action, quote: observed.slice(0, 400), fetched_at: now, kind: shotUrl ? "screenshot" : "attempt_log", quote_found: true, coverage: 1, fetch_status: "ok" });
   claim.evidence_ids.push(evId);
   if (claim.status !== "tested") {
     guide.provenance.corrections.push({ claim_id: id, from: claim.status, to: "tested", reason: `observed directly in the provider console (${now.slice(0, 10)})` });
