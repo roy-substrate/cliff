@@ -1,26 +1,39 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #fbfaf8;
+  --fg: #1a1916;
+  --muted: #6b675f;
+  --line: #e4e0d8;
+  --panel: #ffffff;
+  --accent: #c2410c; /* the cliff */
+  --accent-soft: #fff1e8;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-panel: var(--panel);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+/* markdown-ish step bodies */
+.prose-step p { margin: 0.35rem 0; }
+.prose-step ul { list-style: disc; padding-left: 1.2rem; margin: 0.35rem 0; }
+.prose-step code { font-family: var(--font-geist-mono), monospace; font-size: 0.85em; background: #f1eee8; padding: 0 0.25rem; border-radius: 3px; }
+
+details > summary { cursor: pointer; list-style: none; }
+details > summary::-webkit-details-marker { display: none; }

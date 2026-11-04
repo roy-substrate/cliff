@@ -173,7 +173,8 @@ export async function generateGuide(input: string, emit: Emit, opts: RunOpts = {
     emit({ type: "stage", stage: "synthesize", status: "skipped", note: "not enough sources; emitting an honest fallback guide" });
   }
   const valid = new Set(claims.map((c) => c.id));
-  const finalDraft = draft ? scrubClaimIds(draft, valid) : fallbackDraft(name, slug, homepage);
+  const isFallback = !draft;
+  const finalDraft = draft ? scrubClaimIds(draft, valid) : fallbackDraft(name, slug, homepage, composio.managed_auth);
 
   // ---- S5 verify
   let corrections: Correction[] = [];
@@ -204,8 +205,9 @@ export async function generateGuide(input: string, emit: Emit, opts: RunOpts = {
   // ---- assemble
   const guide: Guide = {
     ...stripDraftExtras(finalDraft),
+    status: isFallback ? "fallback" : "full",
     app: { ...finalDraft.app, name, slug, homepage },
-    difficulty: computeDifficulty(finalDraft),
+    difficulty: isFallback ? { drivers: finalDraft.difficulty_drivers, score: 0, level: "unknown" } : computeDifficulty(finalDraft),
     build_or_borrow: { ...finalDraft.build_or_borrow, composio_managed: composio.managed_auth, composio_slug: composio.toolkit_slug },
     composio: composio.source === "none" ? null : { toolkit_slug: composio.toolkit_slug, tool_count: composio.tool_count, managed_auth: composio.managed_auth, auth_config_fields: composio.auth_config_fields, redirect_uri: composio.redirect_uri },
     provenance: {
@@ -245,13 +247,13 @@ function scrubClaimIds<T>(v: T, valid: Set<string>): T {
   return v;
 }
 
-function fallbackDraft(name: string, slug: string, homepage: string): GuideDraft {
+function fallbackDraft(name: string, slug: string, homepage: string, composioManaged: boolean | null): GuideDraft {
   return {
     app: { name, slug, homepage, developer_portal: null },
     summary: `We could not find enough reliable sources to write a verified guide for ${name}. Below is a generic OAuth 2.0 checklist. Every statement is unverified. Paste the provider's developer docs URL to retry.`,
     has_oauth: true,
     auth_alternatives: [],
-    build_or_borrow: { composio_managed: null, composio_slug: null, reasons_to_bring_own: [], agent_access_allowed: "unknown", verdict: "Unknown. Check whether Composio already has a managed OAuth app for this toolkit before creating your own." },
+    build_or_borrow: { composio_managed: null, composio_slug: null, reasons_to_bring_own: [], agent_access_allowed: "unknown", verdict: composioManaged === true ? "Composio lists managed auth for this toolkit, so try that before creating your own app. We could not verify anything else." : composioManaged === false ? "Composio lists this toolkit as bring-your-own-app. We could not verify the provider's process." : "Unknown. Check whether Composio already has a managed OAuth app for this toolkit before creating your own." },
     time: { hands_on_minutes: 0, approval_required: false, approval_wait_days_min: null, approval_wait_days_max: null, unapproved_usable: true, claim_ids: [] },
     cliff: { scope_tiers: [], paths: [], unapproved_mode: { limits: [], breaks_at: "Unknown", claim_ids: [] } },
     prerequisites: [],

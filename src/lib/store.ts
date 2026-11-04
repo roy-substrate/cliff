@@ -7,7 +7,7 @@ import type { Guide } from "./schema";
  * Library guides live in data/guides (committed). Live-generated guides go to data/guides locally,
  * and to the OS temp dir on Vercel (read-only FS, ephemeral). Set DATABASE_URL later to swap this for Postgres.
  */
-const ROOT = process.env.VERCEL ? path.join(os.tmpdir(), "cliff-guides") : path.join(process.cwd(), "data", "guides");
+const ROOT = process.env.CLIFF_DATA_DIR ? process.env.CLIFF_DATA_DIR : process.env.VERCEL ? path.join(os.tmpdir(), "cliff-guides") : path.join(process.cwd(), "data", "guides");
 const LIBRARY = path.join(process.cwd(), "data", "guides");
 
 export interface StoredVersion {
@@ -56,7 +56,8 @@ export function listLatest(): StoredVersion[] {
     if (!fs.existsSync(root)) continue;
     for (const slug of fs.readdirSync(root)) {
       const v = readFrom(root, slug);
-      if (v) out.set(slug, v);
+      // fallback guides (not enough sources) stay reachable by link but are not library entries
+      if (v && v.guide.status !== "fallback") out.set(slug, v);
     }
   }
   return [...out.values()].sort((a, b) => a.slug.localeCompare(b.slug));

@@ -120,6 +120,8 @@ export const ArtifactKind = z.enum([
 
 /** The whole guide. Rendered by the UI; markdown is just an export. */
 export const Guide = z.object({
+  // "fallback" = not enough sources; time/difficulty fields are placeholders, not findings
+  status: z.enum(["full", "fallback"]),
   app: z.object({
     name: z.string(),
     slug: z.string(),
@@ -222,7 +224,7 @@ export const Guide = z.object({
 export type Guide = z.infer<typeof Guide>;
 
 /** What the synthesizer (Opus) returns. Provenance is assembled by code, not the model. */
-export const GuideDraft = Guide.omit({ provenance: true, difficulty: true, composio: true }).extend({
+export const GuideDraft = Guide.omit({ provenance: true, difficulty: true, composio: true, status: true }).extend({
   difficulty_drivers: z.array(z.string()),
   business_verification_required: z.boolean(),
   paid_plan_or_fee_required: z.boolean(),

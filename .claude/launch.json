@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cliff-dev",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["CLIFF_DATA_DIR=/private/tmp/claude-501/-Users-roy-Library-Application-Support-Claude-scratch-workspaces-918d2410-e3f8-47cb-85da-428e913ec20d-9484e7ff-4b8e-47f2-b2fd-6ff81a2d1ac0-scratch-2026-11-04-985140/c0c8aa57-73ad-4dd9-9c42-b3283c3bdda0/scratchpad/fixture-data", "pnpm", "dev", "--port", "3100"],
+      "port": 3100
+    }
+  ]
+}
