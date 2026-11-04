@@ -49,8 +49,8 @@ export default async function Home() {
           <p className="mx-auto mt-5 max-w-xl text-lg text-ink/70 sm:text-xl">Find out what it takes to connect an app, get approved and go live.</p>
         </div>
 
-        <div className="relative mx-auto mt-14 max-w-3xl">
-          <span className="pointer-events-none absolute -top-[86px] right-6 z-10 animate-bob sm:right-12">
+        <div className="relative mx-auto mt-28 max-w-3xl sm:mt-16">
+          <span className="pointer-events-none absolute -top-[96px] right-4 z-10 animate-bob sm:-top-[86px] sm:right-12">
             <Pip mood="search" size={104} />
           </span>
           <SearchBox />

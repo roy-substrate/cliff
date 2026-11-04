@@ -30,13 +30,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               </span>
             </Link>
             <div className="flex items-center gap-1 text-[15px] font-semibold">
-              <Link href="/apps" className="rounded-full px-4 py-2 transition hover:bg-sky-soft">
+              <Link href="/apps" className="whitespace-nowrap rounded-full px-3 py-2 transition hover:bg-sky-soft sm:px-4">
                 Directory
               </Link>
-              <Link href="/about" className="rounded-full px-4 py-2 transition hover:bg-butter-soft">
+              <Link href="/about" className="hidden whitespace-nowrap rounded-full px-4 py-2 transition hover:bg-butter-soft sm:inline-flex">
                 How it works
               </Link>
-              <Link href="/#search" className="btn-ink ml-1 !px-4 !py-2 !text-base">
+              <Link href="/#search" className="btn-ink ml-1 whitespace-nowrap !px-4 !py-2 !text-base">
                 Check an app
               </Link>
             </div>
