@@ -288,6 +288,10 @@ function strength(c: Claim, evidence: Evidence[]): number {
 function resolveConflict(ids: string[], reason: string, claims: Claim[], evidence: Evidence[], emit: (c: Correction) => void): Correction[] {
   const members = ids.map((id) => claims.find((c) => c.id === id)).filter((c): c is Claim => !!c && (c.status === "tested" || c.status === "primary" || c.status === "secondary"));
   if (members.length < 2) return [];
+  // Real contradictions are between sources. Claims all read from one page are a different fact each, not a dispute
+  // (the detector once set a per-connection rate limit against a per-workspace one, both from the same page).
+  const pages = new Set(members.flatMap((c) => c.evidence_ids.map((id) => evidence.find((e) => e.id === id)?.url).filter(Boolean)));
+  if (pages.size <= 1) return [];
   const max = Math.max(...members.map((c) => strength(c, evidence)));
   const losers = members.filter((c) => strength(c, evidence) < max);
   const demote = losers.length ? losers : members;
