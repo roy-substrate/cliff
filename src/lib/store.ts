@@ -26,16 +26,16 @@ export function newVersionId(slug: string): string {
 
 export function saveVersion(v: StoredVersion): void {
   const dir = path.join(ROOT, v.slug);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, `${v.versionId}.json`), JSON.stringify(v, null, 2));
-  fs.writeFileSync(path.join(dir, "latest.json"), JSON.stringify({ versionId: v.versionId }));
+  fs.mkdirSync(/*turbopackIgnore: true*/ dir, { recursive: true });
+  fs.writeFileSync(/*turbopackIgnore: true*/ path.join(dir, `${v.versionId}.json`), JSON.stringify(v, null, 2));
+  fs.writeFileSync(/*turbopackIgnore: true*/ path.join(dir, "latest.json"), JSON.stringify({ versionId: v.versionId }));
 }
 
 function readFrom(root: string, slug: string, versionId?: string): StoredVersion | null {
   try {
     const dir = path.join(root, slug);
-    const id = versionId ?? JSON.parse(fs.readFileSync(path.join(dir, "latest.json"), "utf8")).versionId;
-    return JSON.parse(fs.readFileSync(path.join(dir, `${id}.json`), "utf8"));
+    const id = versionId ?? JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ path.join(dir, "latest.json"), "utf8")).versionId;
+    return JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ path.join(dir, `${id}.json`), "utf8"));
   } catch {
     return null;
   }
@@ -53,8 +53,8 @@ export function getVersion(versionId: string): StoredVersion | null {
 export function listLatest(): StoredVersion[] {
   const out = new Map<string, StoredVersion>();
   for (const root of [LIBRARY, ROOT]) {
-    if (!fs.existsSync(root)) continue;
-    for (const slug of fs.readdirSync(root)) {
+    if (!fs.existsSync(/*turbopackIgnore: true*/ root)) continue;
+    for (const slug of fs.readdirSync(/*turbopackIgnore: true*/ root)) {
       const v = readFrom(root, slug);
       // fallback guides (not enough sources) stay reachable by link but are not library entries
       if (v && v.guide.status !== "fallback") out.set(slug, v);

@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // ship only the committed library guides with server functions
+  outputFileTracingIncludes: { "/*": ["./data/guides/**/*"] },
   turbopack: {
     rules: {
       "*.css": {

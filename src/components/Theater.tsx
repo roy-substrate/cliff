@@ -14,6 +14,12 @@ const STAGES: { id: Stage; name: string; role: string }[] = [
   { id: "verify", name: "Verifier", role: "Re-fetch every cited page and check each quote" },
 ];
 
+/** Provider/API errors arrive as raw JSON; show the human part. */
+function friendly(msg: string): string {
+  const m = msg.match(/"message":"([^"]+)"/);
+  return (m ? m[1] : msg).slice(0, 200);
+}
+
 type StageState = { status: "idle" | "started" | "done" | "failed" | "skipped"; ms?: number; note?: string };
 type Trace = { id: number; text: string; tone?: "ok" | "bad" | "warn" };
 
@@ -31,11 +37,13 @@ export function Theater({ q, force }: { q: string; force?: boolean }) {
   const started = useRef(false);
   const tid = useRef(0);
 
+  const finished = done !== null || error !== null;
   useEffect(() => {
+    if (finished) return;
     const t0 = Date.now();
     const timer = setInterval(() => setElapsed(Math.round((Date.now() - t0) / 1000)), 500);
     return () => clearInterval(timer);
-  }, []);
+  }, [finished]);
 
   useEffect(() => {
     if (started.current) return;
@@ -63,14 +71,14 @@ export function Theater({ q, force }: { q: string; force?: boolean }) {
           const e = JSON.parse(p.slice(6)) as GenEvent;
           switch (e.type) {
             case "plan": setPlan(e.items); break;
-            case "stage": setStages((s) => ({ ...s, [e.stage]: { status: e.status, ms: e.ms, note: e.note } })); break;
+            case "stage": setStages((s) => ({ ...s, [e.stage]: { status: e.status, ms: e.ms, note: e.note ? friendly(e.note) : e.note } })); break;
             case "search": add(`searched "${e.query}" (${e.hits.length} results)`); break;
             case "fetch": add(`${e.ok ? "read" : "could not read"} ${e.url}`, e.ok ? "ok" : "bad"); break;
             case "probe": add(`probe ${e.outcome}: ${e.url}`, e.outcome === "ok" ? "ok" : "warn"); break;
             case "claim": setClaims((c) => [...c, e.claim]); break;
             case "prior": setPriors((p) => [...p, { topic: e.topic, belief: e.belief }]); break;
             case "verify": setFixes((f) => [...f, { claimId: e.claimId, from: e.from, to: e.to, reason: e.reason }]); break;
-            case "error": add(`${e.stage}: ${e.message}`, "bad"); if (!e.recoverable) setError(e.message); break;
+            case "error": add(`${e.stage}: ${friendly(e.message)}`, "bad"); if (!e.recoverable) setError(friendly(e.message)); break;
             case "cached": setDone({ versionId: e.guideId, cost: 0, cached: true }); break;
             case "done": setDone({ versionId: e.versionId, cost: e.cost_usd, cached: false }); break;
           }
