@@ -17,7 +17,8 @@ const PRICE: Record<ModelKey, { in: number; out: number; cacheRead: number }> = 
 };
 const SEARCH_COST = 10 / 1000;
 
-export const client = new Anthropic();
+let _client: Anthropic | null = null;
+export const getClient = () => (_client ??= new Anthropic());
 
 export class CostMeter {
   usd = 0;
@@ -65,7 +66,7 @@ export async function callModel<T>(o: CallOpts<T>): Promise<T> {
   const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: "user", content: o.user }];
 
   for (let turn = 0; turn < 5; turn++) {
-    const stream = client.beta.messages.stream(
+    const stream = getClient().beta.messages.stream(
       {
         model: MODELS[o.model],
         max_tokens: o.maxTokens ?? 16000,
