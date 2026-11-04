@@ -1,4 +1,11 @@
 export function slugify(s: string): string {
+  // a bare domain or URL ("notion.so", "https://api.slack.com/apps") resolves to the site's own name
+  const host = s.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
+  if (/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(host)) {
+    const parts = host.split(".");
+    const sld = parts.length > 2 && ["co", "com"].includes(parts[parts.length - 2]) ? parts[parts.length - 3] : parts[parts.length - 2];
+    return sld;
+  }
   return s
     .toLowerCase()
     .replace(/^https?:\/\//, "")
